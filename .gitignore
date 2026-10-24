@@ -1,0 +1,8 @@
+# gprbuild output, test programs and test output: see GNUmakefile
+/obj/
+# the program
+/ova_cg_ada
+# editor backups
+*~
+.~/
+src/TAGS
