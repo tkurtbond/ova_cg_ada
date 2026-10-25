@@ -149,16 +149,14 @@ make print-VAR       # show a makefile variable
   Limits is Ctrl+E (`test/quit.sh`).
 - **Browser lines and `Choice` items are 1-based (0: none)** in
   fltkada, where pofltk's `Choice` is 0-based; `Rules.Get` is 0-based,
-  so a Choice's item is `Rules.Get (Kind, Chosen_Index - 1)`. No
-  fltkada call chooses none: `FLTK.Widgets.Menus.Choices.Extra`
-  (`src/`) has `Choose_None`. A browser that shows names has its format
+  so a Choice's item is `Rules.Get (Kind, Chosen_Index - 1)`, and
+  `Clear_Chosen` chooses none. A browser that shows names has its format
   character off, so a name starting with `@` isn't a format code.
 - **Save through alibfyaml's emitter** (`Libfyaml.Documents`), never by
   writing YAML text by hand. **Text goes through
   `Libfyaml.Documents.Styled`, never `Create_Scalar`**: libfyaml writes
   a `Create_Scalar` plain even where that changes or breaks it (`#1
   fan`, a leading quote). `Create_Scalar` is for keys and numbers.
-  `Styled` lives here, not in alibfyaml (PLAN.md).
 - **A portrait's path is relative to the YAML file**, so Save As
   rebases it with `Ova_Cg.Paths.Rebase`; paths are text, never looked
   up on disk.

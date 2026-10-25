@@ -1,5 +1,4 @@
 with Ada.Unchecked_Deallocation;
-with FLTK.Widgets.Menus.Choices.Extra;
 with System;
 
 package body Ova_Cg.Widgets is
@@ -152,7 +151,7 @@ package body Ova_Cg.Widgets is
             end if;
          end loop;
       else
-         FLTK.Widgets.Menus.Choices.Extra.Choose_None (P.Choice.all);
+         P.Choice.Clear_Chosen;
       end if;
       P.Chosen;
    end Choose;

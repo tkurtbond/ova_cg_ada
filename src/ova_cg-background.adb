@@ -2,7 +2,6 @@ with Ada.Unchecked_Deallocation;
 with FLTK.Asks;
 with FLTK.Native_File_Choosers;
 with FLTK.Text_Buffers;
-with FLTK.Widgets.Extra;
 with Ova_Cg.Paths;
 with Ova_Fmt.Entities;
 
@@ -168,7 +167,7 @@ package body Ova_Cg.Background is
       C : Character.Character_Record'Class renames The_Character.all;
    begin
       Open.Portrait_Path.Set_Value (To_String (C.Portrait));
-      FLTK.Widgets.Extra.Clear_Image (Open.Portrait.all);
+      Open.Portrait.Clear_Image;
       Free_Image (Open.Image);
       if C.Has_Portrait then
          Open.Image := new Shared.Shared_Image'

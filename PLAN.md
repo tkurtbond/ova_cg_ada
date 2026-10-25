@@ -16,7 +16,7 @@ package ports a module, and each test its checks, with the same labels.
 | poc, `-OC` | GNAT (gprbuild), Ada 2022, `-gnata` |
 | ArgParser | arg_parser (`arg_parser.gpr`) |
 | Ropes | `Ada.Strings.Unbounded` |
-| polibfyaml | alibfyaml (`libfyaml_ada.gpr`), and `Libfyaml.Documents.Styled` here (below) |
+| polibfyaml | alibfyaml (`libfyaml_ada.gpr`), with its `Libfyaml.Documents.Styled` (below) |
 | pofltk | fltkada (`proj/fltkada_ext.gpr` over its built tree) |
 | `OvaEntities`, `OvaText`, `OvaOut`, `OvaConfig`, `OvaCommon`, `OvaInline` (ova_fmt_po's, copied) | the Ada ova_fmt's sources, compiled from its tree (`OVA_FMT_SRC`), not copied |
 | `FlPreferences` | `FLTK.Environment` (`Fl_Preferences`) |
@@ -71,11 +71,12 @@ with the program's name changed.
   on standard error itself; `Ova_Cg.Cli` exits with status 2.
 - **The files.sh oracle is the Ada ova_fmt** (`OVA_FMT`); ova_fmt_po
   gives the same output and can be named instead.
-- **Styled scalars: `Libfyaml.Documents.Styled`, a child package in
-  this repo's `src/`.** alibfyaml has no way to build a scalar with a
-  style (polibfyaml's `CreateStyledScalar`); a child package sees the
-  document's private handle, so it can build one without changing
-  alibfyaml. It ports polibfyaml's logic (plain when plain is safe, a
+- **Styled scalars: `Libfyaml.Documents.Styled`, now in alibfyaml.**
+  alibfyaml had no way to build a scalar with a style (polibfyaml's
+  `CreateStyledScalar`), so it was written here first, as a child
+  package, which sees the document's private handle, and then moved
+  into alibfyaml with its own test (`test/test_styled.adb` there). It
+  ports polibfyaml's logic (plain when plain is safe, a
   literal block for multi-line text that allows one, double-quoted
   otherwise). The node is parsed from its YAML source with
   `fy_node_build_from_malloc_string`: libfyaml keeps pointing into the
@@ -83,8 +84,7 @@ with the program's name changed.
   owns and frees with the document (or with its parser, if the source
   doesn't parse); nothing here has to outlive the document. Text that
   isn't well-formed UTF-8 goes to `Create_Scalar`, as polibfyaml's
-  does. **A candidate to move into alibfyaml**, with the user's
-  go-ahead.
+  does.
 - **Save builds an empty document by parsing `"[]"`** and replacing its
   root: alibfyaml has no constructor for an empty one.
 - **Save replaces the file with C's `rename`**, after writing
@@ -296,9 +296,10 @@ with its tests before the next.
   file's contents as OvaImages' `Load` does; an invalid or empty one
   is "can't be read". The one shown before is released first, so a
   file changed on disk is read again rather than found in FLTK's
-  cache. fltkada's `Set_Image` can't show no image, so
-  `FLTK.Widgets.Extra.Clear_Image` (ours, beside the Choice's
-  `Extra`) calls the C wrapper with none. Checked under Xvfb: a
+  cache. fltkada's `Set_Image` can't show no image, so a removed
+  portrait is cleared with `Clear_Image`, added to fltkada for this
+  (with `Choice`'s `Clear_Chosen`; both were child packages here
+  first). Checked under Xvfb: a
   800x1000 PNG shows at 194x243 in the 200x250 box and 394x493 after
   the box grows and `Fit`; a 40x50 one is not enlarged; a text file
   is "can't be read"; valgrind: no errors.

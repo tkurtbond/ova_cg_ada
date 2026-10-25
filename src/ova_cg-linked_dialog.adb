@@ -3,7 +3,6 @@ with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with FLTK.Static;
-with FLTK.Widgets.Menus.Choices.Extra;
 with Ova_Cg.Attack_Dialog;
 with Ova_Cg.Calc;
 with System;
@@ -366,7 +365,7 @@ package body Ova_Cg.Linked_Dialog is
          end loop;
       end if;
       if not Found then
-         FLTK.Widgets.Menus.Choices.Extra.Choose_None (Open.Spell_Ability.all);
+         Open.Spell_Ability.Clear_Chosen;
       end if;
       Open.Spell_Help.Page := (if It /= null then It.Page else 0);
    end Choose_Spell_Item;
