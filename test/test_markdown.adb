@@ -252,7 +252,7 @@ begin
    Window.Close;
    --  fltkada keeps no count of the widgets open, as pofltk's
    --  OpenWidgets is: the window's and the tab's are all forgotten, and
-   --  valgrind-headless finds none of them leaked (PLAN.md, "Findings").
+   --  valgrind-headless finds none of them leaked.
    Check.Check (Window.Main = null and then Window.Tabs = null and then Tab.Tab = null
                 and then Tab.Display = null, "every widget is deleted");
    Check.Summary;

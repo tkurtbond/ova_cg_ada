@@ -151,10 +151,8 @@ make print-VAR       # show a makefile variable
   fltkada, where pofltk's `Choice` is 0-based; `Rules.Get` is 0-based,
   so a Choice's item is `Rules.Get (Kind, Chosen_Index - 1)`. No
   fltkada call chooses none: `FLTK.Widgets.Menus.Choices.Extra`
-  (`src/`) has `Choose_None`. **Set a browser's column widths with
-  `Textline.Extra.Set_Column_Widths`**, never fltkada's, which raises
-  (PLAN.md, "Findings"). A browser that shows names has its format character off, so
-  a name starting with `@` isn't a format code.
+  (`src/`) has `Choose_None`. A browser that shows names has its format
+  character off, so a name starting with `@` isn't a format code.
 - **Save through alibfyaml's emitter** (`Libfyaml.Documents`), never by
   writing YAML text by hand. **Text goes through
   `Libfyaml.Documents.Styled`, never `Create_Scalar`**: libfyaml writes

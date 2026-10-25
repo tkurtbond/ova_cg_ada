@@ -2,13 +2,11 @@ with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with FLTK.Static;
-with FLTK.Widgets.Groups.Browsers.Textline.Extra;
 with Ova_Cg.Calc;
 with Ova_Cg.Rules;
 
 package body Ova_Cg.Attack_Dialog is
 
-   package Columns renames FLTK.Widgets.Groups.Browsers.Textline.Extra;
    package Buttons renames Widgets.Buttons;
    package Texts renames Widgets.Texts;
 
@@ -345,7 +343,7 @@ package body Ova_Cg.Attack_Dialog is
       Widgets.Open_Panel (Widgets.Panel_Access (P), X, Y, 335, 200,
                           (if Is_Flaw then Rules.Flaw else Rules.Perk),
                           (if Is_Flaw then "Flaws" else "Perks"), "times", "cost");
-      Columns.Set_Column_Widths (P.Browser.all, [335 - 110, 50]);
+      P.Browser.Set_Column_Widths ([335 - 110, 50]);
       P.Spinner.Set_Range (1.0, 1.0);
       P.Spinner.Set_Value (1.0);
       P.Refresh (0);
@@ -383,6 +381,12 @@ package body Ova_Cg.Attack_Dialog is
       end loop;
       Closed.Clear;
    end Collect;
+
+   procedure Free_Closed is
+   begin
+      FLTK.Static.Remove_Timeout (Collect'Access);
+      Collect;
+   end Free_Closed;
 
    procedure Finish (Changed : Boolean) is
       D : constant Done_Handler := On_Done;

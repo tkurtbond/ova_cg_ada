@@ -445,11 +445,7 @@ package body Ova_Cg.Save is
    --  parsed, its root replaced by Build.
    function New_Document return Document is (Documents.Parse_String ("[]"));
 
-   --  libfyaml's FYECF_MODE_BLOCK, FYECF_MODE (1): the mode field
-   --  starts at bit 20.  alibfyaml's Emit_Mode_Block is 1 at bit 8,
-   --  which is libfyaml's indent field, so it asks for the original
-   --  mode, indented by one (PLAN.md, "Findings").
-   Flags : constant Documents.Emit_Flags := 16#10_0000#;
+   Flags : constant Documents.Emit_Flags := Documents.Emit_Mode_Block;
 
    function All_To_Text (Cs : Ch.Characters) return String is
       D : Document := New_Document;

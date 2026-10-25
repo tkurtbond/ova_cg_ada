@@ -268,14 +268,18 @@ package body Ova_Cg.Window is
 
    --  ---- The rulebook ----
 
-   --  Keeps Text under Key in the preferences, written at once.
-   --  Flush gives no result, so a failure to write isn't seen.
+   --  Keeps Text under Key in the preferences, written at once.  A
+   --  file that can't be written is said; the choice still holds for
+   --  this run.
    procedure Keep (Key, Text : String) is
    begin
       if Root /= null then
          Root.Set (Key, Text);
          Env.Flush (Prefs.all);
       end if;
+   exception
+      when Env.Preference_Error =>
+         Say ("The preferences couldn't be written, so this choice won't be kept for the next run.");
    end Keep;
 
    --  What the preferences hold under Key; "" for nothing.
@@ -1519,6 +1523,9 @@ package body Ova_Cg.Window is
       if Settings.Dialog /= null then
          Settings.Cancel;
       end if;
+      Attack_Dialog.Free_Closed;
+      Linked_Dialog.Free_Closed;
+      Settings.Free_Closed;
       FLTK.Static.Remove_Timeout (Fit_Action'Access);
       FLTK.Static.Remove_Timeout (Rebuild_Action'Access);
       --  Children before their groups (AGENTS.md).

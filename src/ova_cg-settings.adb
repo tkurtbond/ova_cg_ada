@@ -145,6 +145,12 @@ package body Ova_Cg.Settings is
       Closed.Clear;
    end Collect;
 
+   procedure Free_Closed is
+   begin
+      FLTK.Static.Remove_Timeout (Collect'Access);
+      Collect;
+   end Free_Closed;
+
    procedure Finish (Accepted : Boolean) is
       D : constant Done_Handler := On_Done;
    begin

@@ -3,7 +3,6 @@ with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
 with FLTK.Static;
-with FLTK.Widgets.Groups.Browsers.Textline.Extra;
 with FLTK.Widgets.Menus.Choices.Extra;
 with Ova_Cg.Attack_Dialog;
 with Ova_Cg.Calc;
@@ -11,7 +10,6 @@ with System;
 
 package body Ova_Cg.Linked_Dialog is
 
-   package Columns renames FLTK.Widgets.Groups.Browsers.Textline.Extra;
    package Buttons renames Widgets.Buttons;
    package Texts renames Widgets.Texts;
    package Hold renames Widgets.Hold;
@@ -638,6 +636,12 @@ package body Ova_Cg.Linked_Dialog is
       Closed.Clear;
    end Collect;
 
+   procedure Free_Closed is
+   begin
+      FLTK.Static.Remove_Timeout (Collect'Access);
+      Collect;
+   end Free_Closed;
+
    procedure Finish is
       D : constant Done_Handler := On_Done;
    begin
@@ -687,7 +691,7 @@ package body Ova_Cg.Linked_Dialog is
       Open.Spells.Set_Alignment (FLTK.Align_Top_Left);
       Open.Spells.Set_Format_Character (Standard.Character'Val (0));  --  names are text, never format codes
       Open.Spells.Set_Callback (Spells_Action'Access);
-      Columns.Set_Column_Widths (Open.Spells.all, [260, 320]);
+      Open.Spells.Set_Column_Widths ([260, 320]);
       Y := 370;
       Open.Spell_Name := new Texts.Text_Input'(Texts.Forge.Create (70, Y, 250, Row, "Name"));
       The_Cast_Kind :=
@@ -757,7 +761,7 @@ package body Ova_Cg.Linked_Dialog is
       Open.Attacks := new Hold.Hold_Browser'(Hold.Forge.Create (10, Y + 20, Width - 20, 100, "Attacks"));
       Open.Attacks.Set_Alignment (FLTK.Align_Top_Left);
       Open.Attacks.Set_Format_Character (Standard.Character'Val (0));
-      Columns.Set_Column_Widths (Open.Attacks.all, [300, 100, 100]);
+      Open.Attacks.Set_Column_Widths ([300, 100, 100]);
       Y := Y + 125;
       Open.Add_Attack_Button := Button (10, "Add...");
       Open.Edit_Attack_Button := Button (85, "Edit...");

@@ -152,28 +152,28 @@ with the program's name changed.
   leaks what it held; `test_calc` uses a fresh attack there.
 - END costs are `Natural`, so a lost floor at 0 raises
   `Constraint_Error` rather than giving a wrong number.
-- **alibfyaml's emitter flags are wrong** (`Libfyaml.Thin`): it puts
+- **alibfyaml's emitter flags were wrong** (`Libfyaml.Thin`): it put
   the mode at bit 8 and the width at bit 16, but libfyaml's header has
-  the indent at bit 8, the width at bit 12 and the mode at bit 20. So
-  `Emit_Mode_Block` asks for the original mode, indented by one.
-  `Ova_Cg.Save` passes libfyaml's `FYECF_MODE_BLOCK` (`16#10_0000#`)
-  itself, what polibfyaml passes; its files are then byte for byte
-  ova_cg_po's (all 56 in `obj/files/`). **To fix in alibfyaml**, with
-  the user's go-ahead.
-- **fltkada's `Textline_Browser.Set_Column_Widths` raises
-  `Constraint_Error` on every call**: it copies `Widths'Length + 1`
+  the indent at bit 8, the width at bit 12 and the mode at bit 20, so
+  `Emit_Mode_Block` asked for the original mode, indented by one.
+  **Fixed in alibfyaml** (with the user's go-ahead; its
+  `test/test_emit.adb`), and `Ova_Cg.Save` passes `Emit_Mode_Block`,
+  where it passed libfyaml's `FYECF_MODE_BLOCK` (`16#10_0000#`)
+  itself. Its files are byte for byte ova_cg_po's (all 56 in
+  `obj/files/`).
+- **fltkada's `Textline_Browser.Set_Column_Widths` raised
+  `Constraint_Error` on every call**: it copied `Widths'Length + 1`
   widths from `Widths`, one past its end, before setting the closing 0.
-  `FLTK.Widgets.Groups.Browsers.Textline.Extra` (`src/`) sets them
-  right; it takes the widths without the closing 0. **To fix in
-  fltkada**, with the user's go-ahead.
-- **fltkada leaks a `Text_Display`'s scrollbars**: freeing one loses
-  its two `Fl_Scrollbar`s (184 bytes each, valgrind's "definitely
-  lost", made in `Fl_Text_Display`'s constructor), since `Group`'s
-  `Extra_Final` takes every child out of the group (`Clear`) before
-  the C++ destructor would delete the two FLTK made itself. So every
-  editor in Background and the Markdown tab's display leaks 368 bytes
-  once, when the window closes; no errors. **To report to fltkada**,
-  with the user's go-ahead.
+  **Fixed in fltkada** (its `test/column_widths.adb`, FLTKAda-BUGS.md
+  section 10), and `Textline.Extra`, which this repo set them with, is
+  gone.
+- **fltkada leaked a `Text_Display`'s scrollbars**: freeing one lost
+  its two `Fl_Scrollbar`s (184 bytes each, made in `Fl_Text_Display`'s
+  constructor), since `Group`'s `Extra_Final` took every child out of
+  the group (`Clear`) before the C++ destructor would delete the two
+  FLTK made itself. **Fixed in fltkada** (with the user's go-ahead):
+  a group takes out only the children made after its constructor
+  (`test/group_children.adb`, FLTKAda-BUGS.md section 11).
 - fltkada's `Forge.Create` of a group ends it (`fl_group_end`), and
   copies a widget's label (`copy_label`), so a label needn't outlive
   the call.
@@ -193,8 +193,11 @@ with the program's name changed.
   main opens `From_Scope (User, "ova_cg_ada", "ova_cg_ada")`, which
   FLTK keeps in `$XDG_CONFIG_HOME/ova_cg_ada/ova_cg_ada.prefs` (shown
   by a scratch program under valgrind).
-- `FLTK.Environment.Flush` gives no result, so `Window.Keep` can't
-  tell that the preferences weren't written.
+- `FLTK.Environment.Flush` gave no result, so `Window.Keep` couldn't
+  tell that the preferences weren't written. **Fixed in fltkada**
+  (FLTKAda-BUGS.md section 12): it raises `Preference_Error`, and
+  `Keep` says so; the choice still holds for the run (`test_limits`,
+  with preferences under `/proc`).
 - **FLTK calls the `Resize` of a hidden child box of the window**,
   which FLTK resizes with the window (smoke program), so a `Watcher`,
   a box as big as the window and hidden, is the window's resize hook:
@@ -206,7 +209,10 @@ with the program's name changed.
   `OpenWidgets` is, so a GUI test's last check, "every widget is
   deleted", is that every accessor the window and its tabs and
   dialogs give is null after `Window.Close`; `make valgrind-headless`
-  shows that none of their widgets is leaked.
+  shows that none of their widgets is leaked. A closed dialog is freed
+  from a timeout (it closes in its own callback), which the tests and
+  a quit never get to run, so `Window.Close` frees them itself
+  (`Free_Closed`); before it did, every dialog a test closed was lost.
 - **fltkada binds no image writer** (it reads PNGs with
   `FLTK.Images.RGB.PNG`, no `fl_write_png`), so `test_resize` and
   `test_background` write their portraits as binary PPMs, which FLTK's

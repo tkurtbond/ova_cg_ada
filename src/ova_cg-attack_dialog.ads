@@ -75,6 +75,11 @@ package Ova_Cg.Attack_Dialog is
    procedure OK with Pre => Dialog /= null;
    procedure Cancel with Pre => Dialog /= null;
 
+   --  Frees the closed dialogs now, not from the timeout that closing
+   --  one sets: for the window's Close, which runs under no dialog's
+   --  callback.
+   procedure Free_Closed;
+
 private
 
    package Modifier_Vectors is

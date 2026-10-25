@@ -58,4 +58,9 @@ package Ova_Cg.Settings is
    --  For tests: Cancel, as if pushed.
    procedure Cancel with Pre => Dialog /= null;
 
+   --  Frees the closed dialogs now, not from the timeout that closing
+   --  one sets: for the window's Close, which runs under no dialog's
+   --  callback.
+   procedure Free_Closed;
+
 end Ova_Cg.Settings;

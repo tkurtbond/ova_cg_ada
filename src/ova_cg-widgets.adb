@@ -1,11 +1,9 @@
 with Ada.Unchecked_Deallocation;
-with FLTK.Widgets.Groups.Browsers.Textline.Extra;
 with FLTK.Widgets.Menus.Choices.Extra;
 with System;
 
 package body Ova_Cg.Widgets is
 
-   package Columns renames FLTK.Widgets.Groups.Browsers.Textline.Extra;
 
    use type Rules.Item;
    use type System.Address;
@@ -248,7 +246,7 @@ package body Ova_Cg.Widgets is
       P.Browser := new Hold.Hold_Browser'(Hold.Forge.Create (X, Y + 20, W, H - 20, Title));
       P.Browser.Set_Alignment (FLTK.Align_Top_Left);
       P.Browser.Set_Format_Character (Character'Val (0));  --  names are text, never format codes
-      Columns.Set_Column_Widths (P.Browser.all, [W - 70]);  --  then the page's
+      P.Browser.Set_Column_Widths ([W - 70]);  --  then the page's
       P.Browser.Set_Callback (Browser_Action'Access);
       YY := Y + H + Gap;
       P.Choice := new Choices.Choice'(Choices.Forge.Create (X, YY, W - 30, Row));

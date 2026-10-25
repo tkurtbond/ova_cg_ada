@@ -374,6 +374,22 @@ begin
    Pick_Item (Window.Viewer_Item);
    Check.Check (Viewer_Is ("cat %f"), "cancelled: nothing changed");
 
+   --  /proc takes no new directory, so nothing can be written there.
+   declare
+      Unwritable : Window.Database_Access :=
+        new Env.Database'(Env.Forge.From_Filesystem ("/proc/ova_cg_ada_test", Vendor, Application));
+   begin
+      Window.Use_Preferences (Unwritable);
+      Tells := 0;
+      Text_Answer := To_Unbounded_String ("mupdf");
+      Pick_Item (Window.Viewer_Item);
+      Check.Check (Viewer_Is ("mupdf") and then Tells = 1,
+                   "preferences that can't be written: said so, the viewer still used");
+      Window.Use_Preferences (null);
+      Free (Unwritable);
+   end;
+   Window.Use_Preferences (Prefs);
+
    --  The window's group outlives the database freed here: fltkada
    --  counts a database's groups, and frees it after the last.
    Close_Prefs;

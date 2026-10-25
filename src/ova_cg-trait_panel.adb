@@ -1,11 +1,9 @@
 with Ada.Strings.Fixed;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
-with FLTK.Widgets.Groups.Browsers.Textline.Extra;
 
 package body Ova_Cg.Trait_Panel is
 
-   package Columns renames FLTK.Widgets.Groups.Browsers.Textline.Extra;
 
    use type Calc.Trait;
    use type Calc.Sheet;
@@ -67,10 +65,10 @@ package body Ova_Cg.Trait_Panel is
    begin
       if Shows_Points (P) then
          P.Name_W := W - Points_W - Page_W;
-         Columns.Set_Column_Widths (P.Browser.all, [P.Name_W, Points_W]);
+         P.Browser.Set_Column_Widths ([P.Name_W, Points_W]);
       else
          P.Name_W := W - 70;  --  as Widgets.Open_Panel
-         Columns.Set_Column_Widths (P.Browser.all, [P.Name_W]);
+         P.Browser.Set_Column_Widths ([P.Name_W]);
       end if;
       P.Browser.Redraw;
    end Fit;
