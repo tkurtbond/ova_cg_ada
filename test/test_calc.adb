@@ -783,8 +783,36 @@ procedure Test_Calc is
       Free (S);
    end Limits;
 
+   --  A Boss (p. 123-124): a character's Health and Endurance; 5 TV for
+   --  each Boss Ability, whose level no total counts.
+   procedure Boss is
+      S  : Sheet;
+      TV : Integer;
+   begin
+      Sample := To_Unbounded_String ("boss");
+      Renew (S, Boss_Sheet);
+      Add (S.Traits, "Attack", 2);
+      Compute (S);
+      TV := Value (S.TV);
+      L ("HEALTH"); Check_Int (S.Health, 40);
+      L ("ENDURANCE"); Check_Int (S.Endurance, 40);
+      Add (S.Traits, "Health Reserve", 1);
+      Add (S.Traits, "Scale Advantage", 1);
+      Compute (S);
+      L ("TV: 5 for each"); Ok (Value (S.TV) = TV + 10);
+      L ("a Boss Ability's level in no total"); Check_Int (S.Ability_Levels, 2);
+      L ("nor its points"); Check_Int (S.Ability_Points, 2);
+      L ("HEALTH isn't doubled"); Check_Int (S.Health, 40);
+      L ("no warnings"); Ok (Warnings (S) = 0);
+      Renew (S, Character_Sheet);
+      Add (S.Traits, "Escape Plan", 1);
+      Compute (S);
+      L ("a Boss Ability off a Boss's sheet"); Ok (Warned_Any (S, Not_Boss));
+      Free (S);
+   end Boss;
+
 begin
    Samples12;
-   Plain; Rolls; Damage; Endurance; Spells; Stats; Threat_Value; Transformation; Overrides; Limits;
+   Plain; Rolls; Damage; Endurance; Spells; Stats; Threat_Value; Transformation; Overrides; Limits; Boss;
    Check.Summary;
 end Test_Calc;

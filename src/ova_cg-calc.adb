@@ -12,6 +12,7 @@ package body Ova_Cg.Calc is
    Companion_Base : constant := 20;
    Minion_Base    : constant := 10;
    Companion_TV   : constant := 4;  --  taken off a Secondary NPC's TV
+   Boss_TV        : constant := 5;  --  added for each Boss Ability (p. 124)
    Max_Level      : constant := 5;
    Min_Weakness   : constant := -3;
    Cost_Step      : constant := 5;
@@ -564,6 +565,9 @@ package body Ova_Cg.Calc is
       then
          Warn (S, Level_Range, T, null, null, null);
       end if;
+      if Has (T, Boss_Only) and then S.Of_Kind /= Boss_Sheet then
+         Warn (S, Not_Boss, T, null, null, null);
+      end if;
       T.Has_End := T.Mods /= null or else T.Use_Level /= 0;
       Set (T.End_Cost, (if T.Has_End then End_Cost (T.Mods, T.Use_Level) else 0));
       Check_Mods (S, T.Mods, T, null);
@@ -619,7 +623,7 @@ package body Ova_Cg.Calc is
       Form : constant Boolean := S.Transformed;
       Base : constant Integer :=
         (case S.Of_Kind is
-            when Character_Sheet => Character_Base,
+            when Character_Sheet | Boss_Sheet => Character_Base,
             when Companion_Sheet => Companion_Base,
             when Minion_Sheet | Extra_Sheet => Minion_Base);
    begin
@@ -643,9 +647,9 @@ package body Ova_Cg.Calc is
    --  TV (p. 124): the best ROLL, Defense and DX, without the Perks and
    --  Flaws that add to them each time (Attack_Record.TV_Roll, TV_DX), +
    --  Armored + the signed levels that change Health and Endurance + half
-   --  of each marked Ability's; a Companion's 4 less, at least 1.  With no
-   --  attack, the plain one: 2 + Agile + Combat Expert - Clumsy, 1 +
-   --  Attack + Strong - Weak.
+   --  of each marked Ability's + 5 for each Boss Ability; a Companion's 4
+   --  less, at least 1.  With no attack, the plain one: 2 + Agile + Combat
+   --  Expert - Clumsy, 1 + Attack + Strong - Weak.
    procedure Compute_TV (S : not null Sheet) is
       Form : constant Boolean := S.Transformed;
       Any  : Boolean := False;
@@ -682,6 +686,9 @@ package body Ova_Cg.Calc is
       T := S.Traits;
       while T /= null loop
          TV := TV + Half_TV_Level (T);
+         if Has (T, Boss_Only) then
+            TV := TV + Boss_TV;
+         end if;
          if Form then
             F := T.Form;
             while F /= null loop
@@ -711,7 +718,8 @@ package body Ova_Cg.Calc is
      (if N >= 0 then (N + 1) / 2 else -((1 - N) / 2));
 
    --  The totals of the character's own Traits (not a form's, which
-   --  Transformation's level pays for, p. 63), then the limits on them.
+   --  Transformation's level pays for, p. 63; not a Boss Ability, which is
+   --  applied and removed as needed, p. 123), then the limits on them.
    procedure Compute_Totals (S : not null Sheet) is
       O    : Options_Record renames S.Options;
       Half : constant Boolean :=
@@ -721,7 +729,7 @@ package body Ova_Cg.Calc is
    begin
       S.Weakness_Points := 0;
       while T /= null loop
-         Lv := T.Level;
+         Lv := (if Has (T, Boss_Only) then 0 else T.Level);
          Pts := Scaled (abs Lv);
          if Half and then Has (T, Half_Cost) then
             Lv := Half_Up (Lv);

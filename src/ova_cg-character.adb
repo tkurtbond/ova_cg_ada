@@ -164,14 +164,15 @@ package body Ova_Cg.Character is
    end New_Sheet;
 
    --  The sheet kind of an NPC type (p. 123-124): a Heroic NPC's is a
-   --  character's, a Secondary's a Companion's, an Extra's its own; no
-   --  type is a character's.
+   --  character's, a Secondary's a Companion's, an Extra's and a Boss's
+   --  their own; no type is a character's.
    function Kind_Of (Has : Boolean; NPC_Type : E.NPC_Kind) return Calc.Sheet_Kind is
      (if not Has then Calc.Character_Sheet
       else (case NPC_Type is
                when E.Heroic    => Calc.Character_Sheet,
                when E.Secondary => Calc.Companion_Sheet,
-               when E.Extra     => Calc.Extra_Sheet));
+               when E.Extra     => Calc.Extra_Sheet,
+               when E.Boss      => Calc.Boss_Sheet));
 
    procedure Set_NPC_Type (C : not null Character_Access; Has : Boolean; NPC_Type : E.NPC_Kind) is
    begin

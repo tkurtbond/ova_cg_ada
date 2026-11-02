@@ -15,9 +15,10 @@
 --  A Panel is a list and its editor, the shape PLAN.md gives the
 --  Abilities and Weaknesses and the attack dialog's Perks and Flaws: a
 --  browser of lines, under it a Choice of every name of one kind
---  (Rules.Label: "Attack (p. 50)"), a Spinner, a text field, and Add,
---  Change, Remove and ? buttons.  What the lines are, and what the
---  buttons do to the model, are its extension's (its primitives).
+--  (Rules.Label: "Attack (p. 50)"), for a Boss the Boss Abilities after
+--  a divider, a Spinner, a text field, and Add, Change, Remove and ?
+--  buttons.  What the lines are, and what the buttons do to the model,
+--  are its extension's (its primitives).
 --
 --  Every widget here is on the heap, made in the group current when it
 --  is opened; its Free frees the children's Ada objects before the
@@ -139,6 +140,7 @@ package Ova_Cg.Widgets is
 
    type Panel is abstract tagged limited record
       Kind    : Rules.Kind;  --  the Choice's
+      With_Boss : Boolean := False;  --  the Choice offers the Boss Abilities too
       Browser : Browser_Access;
       Choice  : Choice_Access;
       Spinner : Spinner_Access;
@@ -178,9 +180,13 @@ package Ova_Cg.Widgets is
    --  dialog's refresh.  Nothing here.
    procedure Changed (P : in out Panel);
 
-   --  Chooses It in the Choice (none for null, or an item not of the
-   --  panel's kind), and sets the ? button.
+   --  Chooses It in the Choice (none for null, or an item the Choice
+   --  doesn't offer), and sets the ? button.
    procedure Choose (P : in out Panel'Class; It : Rules.Item);
+
+   --  Offers the Boss Abilities, or stops: what is chosen stays, if it
+   --  still can.
+   procedure Offer_Boss (P : in out Panel'Class; On : Boolean);
 
    --  The browser filled again, its line Line selected (0: none) and
    --  the controls loaded from it.

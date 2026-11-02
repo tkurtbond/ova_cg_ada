@@ -456,6 +456,8 @@ package body Ova_Cg.Window is
                      Append (R, "DEFENSE: ");
                   end if;
                   Append (R, "Abilities give the roll more than +5 (p. 21)");
+               when Calc.Not_Boss =>
+                  Append (R, ": only a Boss has Boss Abilities (p. 123)");
             end case;
             Open.Warnings.Add (To_String (R));
          end;
@@ -956,7 +958,8 @@ package body Ova_Cg.Window is
    --  ---- The NPC type ----
 
    --  The NPC type chosen: the sheet's kind, so its Health, Endurance and
-   --  TV, follow it (p. 123-124).  Item 1 is none, item K + 2 NPC_Kind'Val (K).
+   --  TV, and the Abilities offered, follow it (p. 123-124).  Item 1 is
+   --  none, item K + 2 NPC_Kind'Val (K).
    procedure NPC_Type_Action (W : in out FLTK.Widgets.Widget'Class) is
       pragma Unreferenced (W);
       I : constant FLTK.Widgets.Menus.Extended_Index := Open.NPC_Type_In.Chosen_Index;
@@ -967,6 +970,7 @@ package body Ova_Cg.Window is
          Character.Set_NPC_Type (The_Char, True, Ova_Fmt.Entities.NPC_Kind'Val (I - 2));
       end if;
       Changed;
+      Open.Abilities.Refresh (Open.Abilities.Browser.Selected_Index);  --  a Boss's offers the Boss Abilities
    end NPC_Type_Action;
 
    procedure Show_NPC_Type is

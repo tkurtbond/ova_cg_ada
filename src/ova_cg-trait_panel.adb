@@ -7,6 +7,7 @@ package body Ova_Cg.Trait_Panel is
 
    use type Calc.Trait;
    use type Calc.Sheet;
+   use type Calc.Sheet_Kind;
    use type Rules.Item;
    use type Rules.Kind;
 
@@ -73,6 +74,24 @@ package body Ova_Cg.Trait_Panel is
       P.Browser.Redraw;
    end Fit;
 
+   overriding procedure Chosen (P : in out Trait_Panel) is
+      It : Rules.Item;
+   begin
+      Widgets.Chosen (Widgets.Panel (P));
+      It := P.Item;
+      if It /= null and then Rules.Has (It, Rules.Boss_Only) then
+         P.Spinner.Set_Value (1.0);
+         P.Spinner.Deactivate;
+      else
+         P.Spinner.Activate;
+      end if;
+   end Chosen;
+
+   --  Whether the list is a Boss's own Abilities.
+   function Offers_Boss (P : Trait_Panel'Class) return Boolean is
+     (P.Kind = Rules.Ability and then P.Sheet /= null and then P.Owner = null
+      and then P.Sheet.Of_Kind = Calc.Boss_Sheet);
+
    overriding procedure Fill (P : in out Trait_Panel) is
       T      : Calc.Trait;
       X      : Character.Trait;
@@ -83,6 +102,7 @@ package body Ova_Cg.Trait_Panel is
       if P.Sheet = null then
          return;
       end if;
+      P.Offer_Boss (Offers_Boss (P));
       Points := Shows_Points (P);
       Fit (P);
       T := List (P);

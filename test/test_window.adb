@@ -602,6 +602,78 @@ begin
                 and then not Has (Saved, "npc-type"),
                 "none chosen: a character's sheet, no npc-type saved");
 
+   --  ---- The Boss Abilities in the Abilities' Choice: a Boss's alone,
+   --  after a divider ----
+   declare
+      P     : constant Trait_Panel.Trait_Panel_Access := Window.Abilities;
+      W     : constant Trait_Panel.Trait_Panel_Access := Window.Weaknesses;
+      N     : constant Positive := Rules.Count (Rules.Ability);
+      Lines : constant Natural := P.Browser.Number_Of_Lines;
+      TV, Total : Integer;
+      It    : Rules.Item;
+      use type Rules.Item;
+
+      function Not_Boss_Warned return Boolean is
+         L : Calc.Warning_List renames C.Warnings;
+         use type Calc.Warning_Code;
+      begin
+         for I in 1 .. Calc.Length (L) loop
+            if Calc.Element (L, I).Code = Calc.Not_Boss then
+               return True;
+            end if;
+         end loop;
+         return False;
+      end Not_Boss_Warned;
+   begin
+      Check.Check (not P.With_Boss and then P.Choice.Number_Of_Items = N + 1
+                   and then not P.Choice.Get_Flags (N).Divider,
+                   "no type: the Abilities alone, no divider");
+      Choose (Window.NPC_Type_In, NPC_Item (E.Boss));
+      Check.Check (Window.NPC_Type_In.Get_Label (NPC_Item (E.Boss)) = "Boss (p. 123)"
+                   and then C.Of_Kind = Calc.Boss_Sheet and then All_Shown and then Has (Saved, "npc-type: Boss"),
+                   "Boss chosen: its own sheet, shown, and saved");
+      Check.Check (P.With_Boss and then P.Choice.Number_Of_Items = N + 5 and then Choice_Labelled (P.all)
+                   and then P.Choice.Get_Label (N + 1) = "Health Reserve (p. 123)"
+                   and then P.Choice.Get_Label (N + 4) = "Escape Plan (p. 123)",
+                   "a Boss: the Boss Abilities after the others, each with its page");
+      Check.Check (P.Choice.Get_Flags (N).Divider and then not P.Choice.Get_Flags (N - 1).Divider
+                   and then not P.Choice.Get_Flags (N + 1).Divider,
+                   "the divider, under the last of the others");
+      Check.Check (not W.With_Boss and then W.Choice.Number_Of_Items = Rules.Count (Rules.Weakness) + 1,
+                   "the Weaknesses offer nothing new");
+      TV := Calc.Value (C.TV);
+      Total := Calc.Value (C.Ability_Levels);
+      Choose (P.Choice, N + 3);
+      It := P.Item;
+      Check.Check (It /= null and then Rules.Name_Of (It) = "Scale Advantage" and then P.Help.Page = 123
+                   and then not P.Spinner.Is_Active and then Widgets.Spin_Value (P.Spinner.all) = 1,
+                   "a Boss Ability chosen: its page, the level 1 and off");
+      P.Text.Set_Value ("Attack");
+      P.Add_Button.Do_Callback;
+      Settle;
+      Check.Check (P.Browser.Number_Of_Lines = Lines + 1 and then Calc.Value (C.TV) = TV + 5
+                   and then Calc.Value (C.Ability_Levels) = Total and then Has (Saved, "Scale Advantage")
+                   and then List_Shown (P) and then All_Shown,
+                   "added: 5 TV, no levels, saved, shown");
+      Pick (P.all, "Attack");
+      Check.Check (P.Spinner.Is_Active, "another name: the level on again");
+      Select_Line (P.all, Line_With (P.Browser, "Scale Advantage"));
+      Choose (Window.NPC_Type_In, 1);
+      Check.Check (not P.With_Boss and then P.Choice.Number_Of_Items = N + 1
+                   and then not P.Choice.Get_Flags (N).Divider and then Not_Boss_Warned
+                   and then Has (Saved, "Scale Advantage") and then Line_With (Window.Warnings, "p. 123") > 0,
+                   "no longer a Boss: not offered, kept, and warned of");
+      Select_Line (P.all, Line_With (P.Browser, "Scale Advantage"));
+      Check.Check (P.Choice.Chosen_Index = 0 and then P.Item = null and then P.Spinner.Is_Active,
+                   "its line selected: nothing chosen, and nothing fails");
+      P.Remove_Button.Do_Callback;
+      Settle;
+      Check.Check (P.Browser.Number_Of_Lines = Lines and then not Not_Boss_Warned
+                   and then not Has (Saved, "Scale Advantage")
+                   and then Line_With (Window.Warnings, "p. 123") = 0,
+                   "removed: the warning gone");
+   end;
+
    --  ---- Files ----
    Chosen := To_Unbounded_String (Save_Path);
    Pick_Item (Window.Save_As_Item);

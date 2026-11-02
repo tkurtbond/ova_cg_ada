@@ -21,9 +21,9 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 package Ova_Cg.Rules is
 
-   --  Where the NPC types, Heroic, Secondary and Extra (ova_fmt's
-   --  npc-type:), are described: their Health and Endurance; TV's step
-   --  for them is on p. 124.
+   --  Where the NPC types, Heroic, Secondary, Extra and Boss (ova_fmt's
+   --  npc-type:), and the Boss Abilities are described: their Health and
+   --  Endurance; TV's step for them is on p. 124.
    NPC_Types_Page : constant := 123;
 
    type Kind is (Ability, Weakness, Perk, Flaw);
@@ -59,6 +59,7 @@ package Ova_Cg.Rules is
                         --  Witchcraft (p. 58)
       Third_Defense,    --  another alternate Defense Roll, 2 + its level, written after
                         --  Barrier's: Incorporeal Form, its dice as the Defense Roll (p. 55)
+      Boss_Only,        --  a Boss Ability: +5 TV (p. 124), no level in the totals (p. 123)
       --  A Perk's or Flaw's:
       Roll_Each,        --  +1 die a time (Accurate), or -1 (Inaccurate)
       Damage_Each,      --  +1 DX a time (Effective), or -1 (Ineffective)
@@ -114,6 +115,25 @@ package Ova_Cg.Rules is
    --  order.
    function Get (Of_Kind : Kind; I : Natural) return not null Item
      with Pre => I < Count (Of_Kind);
+
+   --  How many Boss Abilities there are.  They are Abilities, but Count
+   --  and Get don't see them: only a Boss's list offers them.
+   function Boss_Count return Natural;
+
+   --  The I'th Boss Ability, 0 <= I < Boss_Count, in the book's order.
+   function Get_Boss (I : Natural) return not null Item
+     with Pre => I < Boss_Count;
+
+   --  How many names a list of a kind offers: With_Boss, a list of
+   --  Abilities offers the Boss Abilities too, at its end.
+   function Offer_Count (Of_Kind : Kind; With_Boss : Boolean) return Natural;
+
+   --  The I'th name such a list offers, 0 <= I < Offer_Count.
+   function Offered (Of_Kind : Kind; I : Natural; With_Boss : Boolean) return not null Item
+     with Pre => I < Offer_Count (Of_Kind, With_Boss);
+
+   --  It's place in such a list, from 0; -1 if the list doesn't offer it.
+   function Offer_Index (It : not null Item; Of_Kind : Kind; With_Boss : Boolean) return Integer;
 
    --  The item named Name, ignoring case, or by an alias ("Vehicle" for
    --  "Vehicle (Mecha)"); null if there is none.  Names are unique

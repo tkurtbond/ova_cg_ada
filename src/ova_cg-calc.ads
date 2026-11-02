@@ -37,7 +37,8 @@ package Ova_Cg.Calc is
      (Character_Sheet,  --  40 and 40 (p. 19); a Vehicle's too (p. 64)
       Companion_Sheet,  --  20 and 20 (p. 52); TV 4 less, at least 1, a Secondary NPC's (p. 123-124)
       Minion_Sheet,     --  10 and 10 (p. 58)
-      Extra_Sheet);     --  10 and 10 (p. 123); TV always 1, an Extra's (p. 124)
+      Extra_Sheet,      --  10 and 10 (p. 123); TV always 1, an Extra's (p. 124)
+      Boss_Sheet);      --  40 and 40, a character's (p. 123); it alone may have Boss Abilities
 
    --  Warning codes.  Each names what it is about in its trait, attack,
    --  modifier or spell; null for the sheet as a whole.
@@ -54,7 +55,8 @@ package Ova_Cg.Calc is
       Base_Zero_Broken,       --  the Character Total (or points) beyond Base Zero's range (p. 21)
       Starting_Broken,        --  Abilities beyond the starting levels and the Weaknesses' (p. 21)
       Ceiling_Broken,         --  Abilities beyond the Power Ceiling (p. 21)
-      Over_Five);             --  attack, or null for Defense: Abilities give a roll more than +5 (p. 21)
+      Over_Five,              --  attack, or null for Defense: Abilities give a roll more than +5 (p. 21)
+      Not_Boss);              --  trait: a Boss Ability on a sheet that isn't a Boss's (p. 123)
 
    --  ---- Numbers ----
 

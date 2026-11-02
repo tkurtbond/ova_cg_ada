@@ -423,6 +423,39 @@ procedure Test_Rules is
          "linked content");
    end Test_Flags;
 
+   --  The Boss Abilities (p. 123): Abilities, found by name, but offered
+   --  only to a list that asks for them, after every other.
+   procedure Test_Boss is
+      N  : constant Natural := Count (Ability);
+      OK : Boolean := Boss_Count = 4;
+   begin
+      OK := OK and then Name_Of (Get_Boss (0)) = "Health Reserve"
+        and then Name_Of (Get_Boss (1)) = "Extra Actions"
+        and then Name_Of (Get_Boss (2)) = "Scale Advantage"
+        and then Name_Of (Get_Boss (3)) = "Escape Plan";
+      Check.Check (OK, "the four Boss Abilities, in the book's order");
+      OK := True;
+      for I in 0 .. 3 loop
+         declare
+            It : constant Item := Get_Boss (I);
+         begin
+            OK := OK and then It.Of_Kind = Ability and then It.Page = 123 and then Has (It, Boss_Only)
+              and then Find (Name_Of (It)) = It and then Offer_Index (It, Ability, False) = -1
+              and then Offer_Index (It, Ability, True) = N + I
+              and then Offered (Ability, N + I, True) = It;
+         end;
+      end loop;
+      Check.Check (OK, "each: an Ability on p. 123, found by name, offered last and only to a Boss's list");
+      for I in 0 .. N - 1 loop
+         OK := OK and then not Has (Get (Ability, I), Boss_Only)
+           and then Offer_Index (Get (Ability, I), Ability, True) = I;
+      end loop;
+      Check.Check (OK, "the other Abilities: none is a Boss Ability, their places the same");
+      Check.Check (Offer_Count (Ability, False) = N and then Offer_Count (Ability, True) = N + 4
+                   and then Offer_Count (Weakness, True) = Count (Weakness),
+                   "only Abilities offer them");
+   end Test_Boss;
+
 begin
    Test_Quick_List;
    Test_Pages;
@@ -430,6 +463,7 @@ begin
    Test_Find;
    Test_Labels;
    Test_Tables;
+   Test_Boss;
    Test_Flags;
    Check.Summary;
 end Test_Rules;

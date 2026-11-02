@@ -126,8 +126,8 @@ package body Ova_Cg.Widgets is
    function Item (P : Panel'Class) return Rules.Item is
       I : constant Natural := P.Choice.Chosen_Index;  --  1-based; 0: none
    begin
-      if I in 1 .. Rules.Count (P.Kind) then
-         return Rules.Get (P.Kind, I - 1);
+      if I in 1 .. Rules.Offer_Count (P.Kind, P.With_Boss) then
+         return Rules.Offered (P.Kind, I - 1, P.With_Boss);
       else
          return null;
       end if;
@@ -142,19 +142,39 @@ package body Ova_Cg.Widgets is
    procedure Changed (P : in out Panel) is null;
 
    procedure Choose (P : in out Panel'Class; It : Rules.Item) is
-      use type Rules.Kind;
+      I : constant Integer := (if It /= null then Rules.Offer_Index (It, P.Kind, P.With_Boss) else -1);
    begin
-      if It /= null and then It.Of_Kind = P.Kind then
-         for I in 0 .. Rules.Count (P.Kind) - 1 loop
-            if Rules.Get (P.Kind, I) = It then
-               P.Choice.Set_Chosen (Place => I + 1);
-            end if;
-         end loop;
+      if I >= 0 then
+         P.Choice.Set_Chosen (Place => I + 1);
       else
          P.Choice.Clear_Chosen;
       end if;
       P.Chosen;
    end Choose;
+
+   --  The Choice filled with the names P offers: a divider under the
+   --  last of its kind's, then the Boss Abilities, if With_Boss.
+   procedure Fill_Choice (P : in out Panel'Class) is
+      Last : constant Integer := Rules.Count (P.Kind) - 1;
+   begin
+      for I in 0 .. Rules.Offer_Count (P.Kind, P.With_Boss) - 1 loop
+         P.Choice.Add (Rules.Label (Rules.Offered (P.Kind, I, P.With_Boss)), null,
+                       Flags => (if P.With_Boss and then I = Last then FLTK.Flag_Divider
+                                 else FLTK.Flag_Normal));
+      end loop;
+   end Fill_Choice;
+
+   procedure Offer_Boss (P : in out Panel'Class; On : Boolean) is
+      It : Rules.Item;
+   begin
+      if On /= P.With_Boss then
+         It := Item (P);
+         P.With_Boss := On;
+         P.Choice.Clear;
+         Fill_Choice (P);
+         Choose (P, It);
+      end if;
+   end Offer_Boss;
 
    procedure Refresh (P : in out Panel'Class; Line : Natural) is
    begin
@@ -249,9 +269,7 @@ package body Ova_Cg.Widgets is
       P.Browser.Set_Callback (Browser_Action'Access);
       YY := Y + H + Gap;
       P.Choice := new Choices.Choice'(Choices.Forge.Create (X, YY, W - 30, Row));
-      for I in 0 .. Rules.Count (Kind) - 1 loop
-         P.Choice.Add (Rules.Label (Rules.Get (Kind, I)), null);
-      end loop;
+      Fill_Choice (P.all);
       P.Choice.Set_Callback (Choice_Action'Access);
       P.Help := Open_Help_Button (X + W - 25, YY, 0);
       YY := YY + Row + Gap;

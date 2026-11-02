@@ -13,6 +13,10 @@
 --  belongs to, so what is shown is Ova_Cg.Calc's; then calls Changed,
 --  the window's or the dialog's.  Selected tells which trait the user
 --  chose (null after Remove), for the controls that act on one.
+--
+--  A Boss's own Abilities (not a form's, not a partner's) offer the Boss
+--  Abilities, which have no level: the file's level: is always 1, and
+--  the Spinner is off while one is chosen.
 
 private with Ada.Containers.Vectors;
 with Ova_Cg.Calc;
@@ -58,6 +62,9 @@ package Ova_Cg.Trait_Panel is
    --  Sets the columns' widths from the browser's width, as it is now:
    --  the name's column takes what the points and the page leave.
    procedure Fit (P : in out Trait_Panel'Class);
+
+   --  After the Choice changes: a Boss Ability's Spinner is 1, and off.
+   overriding procedure Chosen (P : in out Trait_Panel);
 
    overriding procedure Fill (P : in out Trait_Panel);
    overriding procedure Load (P : in out Trait_Panel; Line : Positive);

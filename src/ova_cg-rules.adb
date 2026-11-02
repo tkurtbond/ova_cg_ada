@@ -2,7 +2,8 @@ with Ada.Characters.Handling;
 
 package body Ova_Cg.Rules is
 
-   Max_Items : constant := 200;
+   Max_Items        : constant := 200;
+   N_Boss_Abilities : constant := 4;
 
    type Flag_List is array (Positive range <>) of Flag;
 
@@ -10,6 +11,11 @@ package body Ova_Cg.Rules is
    N_Items : Natural := 0;
    First   : array (Kind) of Natural := [others => 0];  --  each kind's span of items
    Counts  : array (Kind) of Natural := [others => 0];
+
+   --  The Boss Abilities: of kind Ability, but outside its span, so that
+   --  only a Boss's list offers them.
+   Boss   : array (0 .. N_Boss_Abilities - 1) of Item;
+   N_Boss : Natural := 0;
 
    --  Other names an item is found by: the Quick List's abbreviation,
    --  and the name without its parenthesis.
@@ -111,6 +117,15 @@ package body Ova_Cg.Rules is
       end loop;
       raise Program_Error with "no item " & Name;
    end Alias;
+
+   --  A Boss Ability: an Ability, kept out of the kind's span (Count, Get).
+   procedure B (Name : String) is
+      I : constant Natural := New_Item (Name, Ability, NPC_Types_Page, [Boss_Only]);
+   begin
+      Counts (Ability) := Counts (Ability) - 1;
+      Boss (N_Boss) := Items (I)'Access;
+      N_Boss := N_Boss + 1;
+   end B;
 
    procedure Abilities is
    begin
@@ -301,12 +316,41 @@ package body Ova_Cg.Rules is
       PF ("Weapon", Flaw, 89, -5, 1, []);
    end Perks_And_Flaws;
 
+   --  In the book's order (p. 123).
+   procedure Boss_Abilities is
+   begin
+      B ("Health Reserve");
+      B ("Extra Actions");
+      B ("Scale Advantage");
+      B ("Escape Plan");
+   end Boss_Abilities;
+
    --  ---- Finding items ----
 
    function Count (Of_Kind : Kind) return Natural is (Counts (Of_Kind));
 
    function Get (Of_Kind : Kind; I : Natural) return not null Item is
      (Items (First (Of_Kind) + I)'Access);
+
+   function Boss_Count return Natural is (N_Boss);
+
+   function Get_Boss (I : Natural) return not null Item is (Boss (I));
+
+   function Offer_Count (Of_Kind : Kind; With_Boss : Boolean) return Natural is
+     (if With_Boss and then Of_Kind = Ability then Counts (Of_Kind) + N_Boss else Counts (Of_Kind));
+
+   function Offered (Of_Kind : Kind; I : Natural; With_Boss : Boolean) return not null Item is
+     (if I < Counts (Of_Kind) then Get (Of_Kind, I) else Get_Boss (I - Counts (Of_Kind)));
+
+   function Offer_Index (It : not null Item; Of_Kind : Kind; With_Boss : Boolean) return Integer is
+   begin
+      for I in 0 .. Offer_Count (Of_Kind, With_Boss) - 1 loop
+         if Offered (Of_Kind, I, With_Boss) = It then
+            return I;
+         end if;
+      end loop;
+      return -1;
+   end Offer_Index;
 
    function Find (Name : String) return Item is
    begin
@@ -371,6 +415,7 @@ begin
    Abilities;
    Weaknesses;
    Perks_And_Flaws;
+   Boss_Abilities;
    Spell_Row (1, 20, 30, 40, 50, 60);
    Spell_Row (2, 10, 20, 30, 40, 50);
    Spell_Row (3, 5, 10, 20, 30, 40);

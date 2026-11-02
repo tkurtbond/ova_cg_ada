@@ -136,6 +136,13 @@ with the program's name changed.
   made again (a 0.0 timeout), since its row's boxes point to it; the
   characters put away by New or Open are freed after the new ones are
   shown, and a character removed after the next one is shown.
+- **Boss NPCs** follow ova_cg_po's PLAN.md, "Boss NPCs": `Boss_Only`
+  items that `Rules.Find` finds and `Count` and `Get` don't, offered
+  through `Offer_Count`, `Offered` and `Offer_Index`, only by a Boss's
+  own Abilities. The divider is `FLTK.Flag_Divider` on the last of the
+  other Abilities: a flag, not a row, so no index shifts. The spell
+  chooser needs no change, since its search already leaves unchosen an
+  item it doesn't reach.
 
 ## Findings
 

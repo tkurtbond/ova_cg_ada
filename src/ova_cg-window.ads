@@ -109,7 +109,7 @@ package Ova_Cg.Window is
    function Name_In return Widgets.Input_Access;
    function Player_In return Widgets.Input_Access;
    function Tagline_In return Widgets.Input_Access;
-   --  The NPC type: item 1 none, then Heroic, Secondary and Extra.
+   --  The NPC type: item 1 none, then Heroic, Secondary, Extra and Boss.
    function NPC_Type_In return Widgets.Choice_Access;
    function Abilities return Trait_Panel.Trait_Panel_Access;
    function Weaknesses return Trait_Panel.Trait_Panel_Access;

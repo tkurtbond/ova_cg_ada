@@ -214,6 +214,18 @@ begin
    Ch.Recompute (C);
    Check.Check (C.Of_Kind = Calc.Extra_Sheet and then Calc.Value (C.Health) = 20 and then Calc.Value (C.TV) = 1,
                 "Extra: HEALTH 10 + Tough 1, TV 1");
+   Ch.Set_NPC_Type (C, True, E.Boss);
+   Ch.Recompute (C);
+   Check.Check (C.Of_Kind = Calc.Boss_Sheet and then Calc.Value (C.Health) = 50
+                and then Calc.Value (C.Endurance) = 40 and then Has (Save.To_Text (C), "npc-type: Boss"),
+                "Boss: HEALTH 40 + Tough 1, ENDURANCE 40, saved");
+   Ok := Save.Save (C, Saved, Msg) and then Ch.Load (Saved, C2, Msg);
+   Check.Check (Ok and then Ch.Notices.Is_Empty and then C2.Has_NPC_Type and then C2.NPC_Type = E.Boss
+                and then C2.Of_Kind = Calc.Boss_Sheet,
+                "loaded again: a Boss's sheet; no notices");
+   if Ok then
+      Free (C2);
+   end if;
    Ch.Set_NPC_Type (C, True, E.Heroic);
    Ch.Recompute (C);
    Check.Check (C.Of_Kind = Calc.Character_Sheet and then Calc.Value (C.Health) = 50, "Heroic: a character's sheet");
