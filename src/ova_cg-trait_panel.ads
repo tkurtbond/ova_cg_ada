@@ -46,9 +46,6 @@ package Ova_Cg.Trait_Panel is
    function Owner (P : Trait_Panel'Class) return Calc.Trait;
    function Top (P : Trait_Panel'Class) return Character.Character_Access;
 
-   --  The names' column's width, as Fit set it.
-   function Name_W (P : Trait_Panel'Class) return Integer;
-
    --  The trait on line Line (from 1); null for none.
    function Trait_At (P : Trait_Panel'Class; Line : Natural) return Character.Trait;
 
@@ -58,10 +55,6 @@ package Ova_Cg.Trait_Panel is
    --  Whether the lines show Scaled Cost's points: a sheet's own traits
    --  under it, not a form's, which no total counts (p. 63).
    function Shows_Points (P : Trait_Panel'Class) return Boolean;
-
-   --  Sets the columns' widths from the browser's width, as it is now:
-   --  the name's column takes what the points and the page leave.
-   procedure Fit (P : in out Trait_Panel'Class);
 
    --  After the Choice changes: a Boss Ability's Spinner is 1, and off.
    overriding procedure Chosen (P : in out Trait_Panel);
@@ -101,7 +94,6 @@ private
       Owner    : Calc.Trait;
       Top      : Character.Character_Access;
       Shown    : Trait_Vectors.Vector;  --  Shown (I): line I's
-      Name_W   : Integer := 0;
       Selected : Selected_Handler;
       Changed  : Changed_Handler;
    end record;

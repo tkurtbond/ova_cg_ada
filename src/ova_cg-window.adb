@@ -228,7 +228,7 @@ package body Ova_Cg.Window is
       else
          C.Set_Title ("Open a character");
       end if;
-      C.Set_Filter ("YAML" & ASCII.HT & "*.{yaml,yml}");  --  FLTK's "name<tab>pattern"
+      C.Add_Filter ("YAML", "*.{yaml,yml}");
       if C.Show = Picked then
          Path := To_Unbounded_String (C.Get_Filename);
       end if;
@@ -241,7 +241,7 @@ package body Ova_Cg.Window is
    begin
       Path := Null_Unbounded_String;
       C.Set_Title ("The rulebook's PDF");
-      C.Set_Filter ("PDF" & ASCII.HT & "*.pdf");
+      C.Add_Filter ("PDF", "*.pdf");
       if C.Show = Picked then
          Path := To_Unbounded_String (C.Get_Filename);
       end if;
@@ -904,13 +904,11 @@ package body Ova_Cg.Window is
    end Show_Rows;
 
    --  What FLTK doesn't stretch, fitted to the window's size: the combat
-   --  box's rows, the traits' columns, and the portrait.
+   --  box's rows.  FLTK fits the traits' columns (-1) and the portrait
+   --  (Set_Image_Fit) itself.
    procedure Fit_Action is
    begin
       Show_Rows;
-      Open.Abilities.Fit;
-      Open.Weaknesses.Fit;
-      Background.Fit;
    end Fit_Action;
 
    --  FLTK stretches the window's widgets; the rest is fitted later,
@@ -1014,65 +1012,43 @@ package body Ova_Cg.Window is
    procedure Transformed_Action (W : in out FLTK.Widgets.Widget'Class) is
       pragma Unreferenced (W);
    begin
-      The_Char.Transformed := Open.Bar.Get_Flags (Open.Items.Transformed_Item).Value;
+      The_Char.Transformed := Open.Bar.Is_Item_Checked (Open.Items.Transformed_Item);
       Changed;
    end Transformed_Action;
 
    --  The menu's toggle set from the character.
    procedure Show_Transformed is
-      F : FLTK.Menu_Flag := Open.Bar.Get_Flags (Open.Items.Transformed_Item);
    begin
-      F.Value := The_Char.Transformed;
-      Open.Bar.Set_Flags (Open.Items.Transformed_Item, F);
+      Open.Bar.Set_Item_Checked (Open.Items.Transformed_Item, The_Char.Transformed);
    end Show_Transformed;
 
    --  ---- The file's characters ----
 
-   --  Character I's label in the Choice: its number and name, any "&"
-   --  doubled so that FLTK shows it.
+   --  Character I's label in the Choice: its number and name.
    function Character_Label (I : Positive) return String is
       Name : constant String := To_String (Chars (I).Name);
-      R    : Unbounded_String := To_Unbounded_String (Image (I) & ". ");
    begin
-      if Name = "" then
-         Append (R, "(no name)");
-      else
-         for Ch of Name loop
-            if Ch = '&' then
-               Append (R, '&');
-            end if;
-            Append (R, Ch);
-         end loop;
-      end if;
-      return To_String (R);
+      return Image (I) & ". " & (if Name = "" then "(no name)" else Name);
    end Character_Label;
-
-   --  Item I of the menu bar active if On.
-   procedure Activate (I : Item_Index; On : Boolean) is
-      F : FLTK.Menu_Flag := Open.Bar.Get_Flags (I);
-   begin
-      F.Inactive := not On;
-      Open.Bar.Set_Flags (I, F);
-   end Activate;
 
    --  The Choice lists the characters again, the one shown chosen, and
    --  the Character menu's items are active where they can do something.
-   --  Each item is added as "-" and then labelled, so that a "/" in a
-   --  name isn't taken for a submenu.
+   --  Each item is added as text, so that FLTK shows a name as it is: a
+   --  "/" not taken for a submenu, an "&" or "@" not for a shortcut or a
+   --  symbol.
    procedure Show_Characters is
       N : constant Natural := Count;
    begin
       Open.Character_Choice.Clear;
       for I in 1 .. N loop
-         Open.Character_Choice.Add ("-", null);
-         Open.Character_Choice.Set_Label (I, Character_Label (I));
+         Open.Character_Choice.Add_Text (Character_Label (I));
       end loop;
       Open.Character_Choice.Set_Chosen (Cur);
-      Activate (Open.Items.Remove_Character_Item, N > 1);
-      Activate (Open.Items.Move_Up_Item, Cur > 1);
-      Activate (Open.Items.Previous_Item, Cur > 1);
-      Activate (Open.Items.Move_Down_Item, Cur < N);
-      Activate (Open.Items.Next_Item, Cur < N);
+      Open.Bar.Set_Item_Active (Open.Items.Remove_Character_Item, N > 1);
+      Open.Bar.Set_Item_Active (Open.Items.Move_Up_Item, Cur > 1);
+      Open.Bar.Set_Item_Active (Open.Items.Previous_Item, Cur > 1);
+      Open.Bar.Set_Item_Active (Open.Items.Move_Down_Item, Cur < N);
+      Open.Bar.Set_Item_Active (Open.Items.Next_Item, Cur < N);
    end Show_Characters;
 
    --  Shows character I.

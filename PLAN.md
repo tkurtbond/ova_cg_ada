@@ -208,8 +208,10 @@ with the program's name changed.
 - **FLTK calls the `Resize` of a hidden child box of the window**,
   which FLTK resizes with the window (smoke program), so a `Watcher`,
   a box as big as the window and hidden, is the window's resize hook:
-  it fits what FLTK doesn't stretch (the combat box's rows, the trait
-  panels' columns, the portrait) from a timeout.
+  it fits what FLTK doesn't stretch (the combat box's rows) from a
+  timeout. (It fitted the trait panels' name columns and the portrait
+  too, until fltkada's `-1` column width and `Set_Image_Fit` let FLTK
+  do both; 2026-11-15.)
 - `FLTK.Asks.Text_Input` gives "" for Cancel, so the window's
   `Ask_Text` takes an empty answer as Cancel, as ova_cg_po's does.
 - **fltkada keeps no count of the widgets open**, as pofltk's
@@ -266,6 +268,18 @@ with its tests before the next.
   labels are ova_cg_po's, check for check, and each was shown to fail
   on a planted bug. `make test`, `make test-headless`, `make
   test-sway` pass; `make valgrind-headless`: no errors.
+- fltkada's Phase 30 helpers in use [done, 2026-11-15]: the main
+  checks `FLTK.Static.Can_Open_Display` too (`cli.sh`, "named but
+  gone"); menus use `Add_Text` and the item-state calls; the file
+  choosers `Add_Filter`; the portrait `Set_Image_Fit`; the trait
+  panels' and the attack dialog's name columns `-1`; spinners
+  `Get_Integer_Value` (`Widgets.Spin_Value` gone); the prose
+  `Set_Entire_Text_Quietly`; `test_limits` `Find_Line`. Linked_Dialog's
+  widths stay fixed: the dialog doesn't resize. `Ova_Cg.Background`
+  catches the `No_Image_Error` fltkada's `Shared.Forge.Create` now
+  raises for a file it can't read (fltkada bug 141's fix). `make
+  test`, `test-headless`, `test-sway`, `valgrind-headless` and
+  `valgrind-sway` pass.
 
 ## The window's widgets
 
@@ -277,11 +291,12 @@ with its tests before the next.
   among the open panels, as OvaWidgets' `PanelOf` does by pointer.
   `Close_Panel` frees its widgets, where ova_cg_po's are deleted with
   their window, so it is closed before its window is freed.
-- **Menu labels from the user's text** are set with `Set_Label` on an
-  item added as a placeholder, as ova_cg_po does, so FLTK doesn't read
-  `/` as a submenu; `&` is doubled in a character's name. Rules names
-  hold none of `/`, `&`, `_` or `\`, so a Choice adds `Rules.Label`
-  as it is.
+- **Menu labels from the user's text** are added with fltkada's
+  `Add_Text`, which takes the text literally, so FLTK reads no `/` as
+  a submenu and no `&` or `_` as a shortcut (`test_window`, "Imp/Co @b
+  _x"). Until 2026-11-15 they were set with `Set_Label` on a
+  placeholder item, as ova_cg_po does, with `&` doubled. Item state is
+  `Is_Item_Checked`, `Set_Item_Checked` and `Set_Item_Active`.
 - **A dialog that closes itself** (`Attack_Dialog`, and the others
   like it) hides its window and hands its widgets to a list a zero
   timeout frees, since OK and Cancel run inside a widget's callback.
@@ -296,8 +311,9 @@ with its tests before the next.
   widget, then the tabs, so the window calls it before freeing its
   Tabs. Each prose buffer has its own modify callback, an instance of
   one generic a section, since fltkada's callback isn't told its
-  buffer; `Show` sets the buffers while `Filling`, so the callbacks
-  report nothing.
+  buffer; `Show` sets them with `Set_Entire_Text_Quietly`, so the
+  callbacks report nothing (until 2026-11-15, by being set while
+  `Filling`).
 - **The portrait is a shared image** (`FLTK.Images.Shared`, after
   `Register_Images`), which picks PNG, JPEG, GIF, BMP or SVG by the
   file's contents as OvaImages' `Load` does; an invalid or empty one
@@ -309,7 +325,10 @@ with its tests before the next.
   first). Checked under Xvfb: a
   800x1000 PNG shows at 194x243 in the 200x250 box and 394x493 after
   the box grows and `Fit`; a 40x50 one is not enlarged; a text file
-  is "can't be read"; valgrind: no errors.
+  is "can't be read"; valgrind: no errors. Since 2026-11-15 the box
+  has `Set_Image_Fit (True, Expand => False)`, so FLTK scales the
+  image as it draws, keeping its own size, and `Fit` and `Scale` are
+  gone (`test_resize`, `test_background`).
 - **The notes are a vector** (`Ova_Fmt.Entities.Note_Vectors`), where
   ova_cg_po's are a list: Add appends, Change replaces the element,
   Remove deletes it.

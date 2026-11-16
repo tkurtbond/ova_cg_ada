@@ -217,7 +217,7 @@ package body Ova_Cg.Attack_Dialog is
       end if;
       Max := Integer'Min (It.Max_Times, Max_Count);
       P.Spinner.Set_Range (1.0, Long_Float (Max));
-      if Widgets.Spin_Value (P.Spinner.all) > Max then
+      if P.Spinner.Get_Integer_Value > Max then
          P.Spinner.Set_Value (Long_Float (Max));
       end if;
       if Max > 1 then
@@ -256,7 +256,7 @@ package body Ova_Cg.Attack_Dialog is
       N    : Calc.Number;
       Good : Boolean := True;
    begin
-      Times := Widgets.Spin_Value (P.Spinner.all);
+      Times := P.Spinner.Get_Integer_Value;
       Cost := 0;
       if It.Cost_Kind /= Rules.Fixed_Cost then
          Calc.Clear (N);
@@ -343,7 +343,7 @@ package body Ova_Cg.Attack_Dialog is
       Widgets.Open_Panel (Widgets.Panel_Access (P), X, Y, 335, 200,
                           (if Is_Flaw then Rules.Flaw else Rules.Perk),
                           (if Is_Flaw then "Flaws" else "Perks"), "times", "cost");
-      P.Browser.Set_Column_Widths ([335 - 110, 50]);
+      P.Browser.Set_Column_Widths ([-1, 50, 60]);  --  the name takes what the cost's and page's leave
       P.Spinner.Set_Range (1.0, 1.0);
       P.Spinner.Set_Value (1.0);
       P.Refresh (0);

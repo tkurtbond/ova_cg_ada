@@ -89,11 +89,11 @@ package body Ova_Cg.Settings is
    procedure Take is
       O : constant Calc.Options_Record :=
         (Base_Zero              => Open.Base_Zero.Is_On,
-         Base_Zero_Range        => Widgets.Spin_Value (Open.Base_Zero_Range.all),
+         Base_Zero_Range        => Open.Base_Zero_Range.Get_Integer_Value,
          Power_Ceiling          => Open.Power_Ceiling.Is_On,
-         Ceiling                => Widgets.Spin_Value (Open.Ceiling.all),
+         Ceiling                => Open.Ceiling.Get_Integer_Value,
          Starting_Levels        => Open.Starting_Levels.Is_On,
-         Starting               => Widgets.Spin_Value (Open.Starting.all),
+         Starting               => Open.Starting.Get_Integer_Value,
          Scaled_Cost            => Open.Scaled_Cost.Is_On,
          Half_Cost_Knowledge    => Open.Half_Cost.Is_On,
          Combined_Effectiveness => Open.Combined.Is_On);

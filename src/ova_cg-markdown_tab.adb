@@ -50,7 +50,7 @@ package body Ova_Cg.Markdown_Tab is
       Path := Null_Unbounded_String;
       C.Set_Title ("Save the Markdown sheet as");
       C.Set_Options (Saveas_Confirm);
-      C.Set_Filter ("Markdown" & ASCII.HT & "*.md");  --  FLTK's "name<tab>pattern"
+      C.Add_Filter ("Markdown", "*.md");
       if Suggested /= "" then
          C.Set_Preset_File (Suggested);
       end if;

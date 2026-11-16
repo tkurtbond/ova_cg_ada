@@ -5,8 +5,9 @@
 --  standard error, status 1, before a display is needed, as a mistake
 --  on the command line is (status 2).  The program can't do anything
 --  without a window, so with no display it says so and exits with
---  status 1, before FLTK is asked to open one (FLTK's own "Can't open
---  display" is for a display that is set but can't be opened).
+--  status 1, before FLTK is asked to open one, which would end the
+--  program with FLTK's own "Can't open display".  A display that is
+--  named but can't be opened is said too (FLTK.Static.Can_Open_Display).
 
 with Ada.Environment_Variables;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -14,6 +15,7 @@ with Ada.Text_IO;
 with GNAT.OS_Lib;
 with Ada.Unchecked_Deallocation;
 with FLTK.Environment;
+with FLTK.Static;
 with FLTK;
 with Ova_Cg.Character;
 with Ova_Cg.Cli;
@@ -50,14 +52,22 @@ procedure Ova_Cg_Main is
    --  With no display, the reason and, in tmux, where it came from
    --  (PLAN.md, "Findings": a tmux session last attached from a
    --  terminal without a display drops DISPLAY and WAYLAND_DISPLAY from
-   --  new panes).
+   --  new panes, and may keep a DISPLAY that is gone).  Both unset is
+   --  refused before FLTK is asked: FLTK would still try the socket
+   --  wayland-0.
    procedure Require_Display is
       use Ada.Text_IO;
+      Unset : constant Boolean := not Is_Set ("DISPLAY") and not Is_Set ("WAYLAND_DISPLAY");
    begin
-      if not Is_Set ("DISPLAY") and not Is_Set ("WAYLAND_DISPLAY") then
+      if Unset or else not FLTK.Static.Can_Open_Display then
          Flush (Standard_Output);
-         Put_Line (Standard_Error,
-                   Program & ": no display: neither DISPLAY nor WAYLAND_DISPLAY is set");
+         if Unset then
+            Put_Line (Standard_Error,
+                      Program & ": no display: neither DISPLAY nor WAYLAND_DISPLAY is set");
+         else
+            Put_Line (Standard_Error,
+                      Program & ": no display: the one DISPLAY or WAYLAND_DISPLAY names can't be opened");
+         end if;
          if Is_Set ("TMUX") then
             Put_Line (Standard_Error,
                       Program & ": in tmux, the session may have been attached from a "

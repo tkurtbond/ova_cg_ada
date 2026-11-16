@@ -15,6 +15,7 @@ with Ada.Unchecked_Deallocation;
 with Check;
 with FLTK.Environment;
 with FLTK.Menu_Items;
+with FLTK.Widgets.Groups.Browsers.Textline;
 with Ova_Cg.Calc;
 with Ova_Cg.Character;
 with Ova_Cg.Rules;
@@ -30,6 +31,7 @@ procedure Test_Limits is
    use Ova_Cg;
 
    package Ch renames Ova_Cg.Character;
+   use type FLTK.Widgets.Groups.Browsers.Textline.Column_Widths;
    use type FLTK.Color, Rules.Item, Settings.Window_Access, Window.Window_Access, Window.Database_Access;
 
    package Env renames FLTK.Environment;
@@ -150,15 +152,10 @@ procedure Test_Limits is
       Want : constant String :=
         Head & Tab & (if Points /= "" then Points & Tab else "") & Rules.Page_Text (Rules.Find (Name));
    begin
-      for I in 1 .. P.Browser.Number_Of_Lines loop
-         if P.Browser.Get_Line_Text (I) = Want then
-            return True;
-         end if;
-      end loop;
-      return False;
+      return P.Browser.Find_Line (Want) > 0;
    end Listed;
 
-   function Value (Sp : Widgets.Spinner_Access) return Integer is (Widgets.Spin_Value (Sp.all));
+   function Value (Sp : Widgets.Spinner_Access) return Integer is (Sp.Get_Integer_Value);
 
    procedure Pick_Item (Item : Window.Item_Index) is
    begin
@@ -250,6 +247,8 @@ begin
    Check.Check (Calc.Value (C.Ability_Points) = 4
                 and then Window.Number (Window.Ability_Points_Number).Is_Visible,
                 "and the Abilities' 4 points shown");
+   Check.Check (Window.Abilities.Browser.Get_Column_Widths = [-1, 45, 60],
+                "the traits' points in a column, the name taking what it and the page's leave");
    Turn (S.Power_Ceiling, True);
    Spin (S.Ceiling, 3);
    Check.Check (Reds_Are ("--Pa") and then Warned ("Power Ceiling"),

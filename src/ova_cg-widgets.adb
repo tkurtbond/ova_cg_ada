@@ -158,9 +158,9 @@ package body Ova_Cg.Widgets is
       Last : constant Integer := Rules.Count (P.Kind) - 1;
    begin
       for I in 0 .. Rules.Offer_Count (P.Kind, P.With_Boss) - 1 loop
-         P.Choice.Add (Rules.Label (Rules.Offered (P.Kind, I, P.With_Boss)), null,
-                       Flags => (if P.With_Boss and then I = Last then FLTK.Flag_Divider
-                                 else FLTK.Flag_Normal));
+         P.Choice.Add_Text (Rules.Label (Rules.Offered (P.Kind, I, P.With_Boss)), null,
+                            Flags => (if P.With_Boss and then I = Last then FLTK.Flag_Divider
+                                      else FLTK.Flag_Normal));
       end loop;
    end Fill_Choice;
 
@@ -265,7 +265,7 @@ package body Ova_Cg.Widgets is
       P.Browser := new Hold.Hold_Browser'(Hold.Forge.Create (X, Y + 20, W, H - 20, Title));
       P.Browser.Set_Alignment (FLTK.Align_Top_Left);
       P.Browser.Set_Format_Character (Character'Val (0));  --  names are text, never format codes
-      P.Browser.Set_Column_Widths ([W - 70]);  --  then the page's
+      P.Browser.Set_Column_Widths ([-1, 70]);  --  the name takes what the page's leaves
       P.Browser.Set_Callback (Browser_Action'Access);
       YY := Y + H + Gap;
       P.Choice := new Choices.Choice'(Choices.Forge.Create (X, YY, W - 30, Row));
@@ -314,12 +314,5 @@ package body Ova_Cg.Widgets is
       Free_Button (P.Change_Button);
       Free_Button (P.Remove_Button);
    end Close_Panel;
-
-   --  ---- Helpers ----
-
-   function Spin_Value (S : Spinners.Spinner'Class) return Integer is
-   begin
-      return Integer (Long_Float'Floor (S.Get_Value));
-   end Spin_Value;
 
 end Ova_Cg.Widgets;

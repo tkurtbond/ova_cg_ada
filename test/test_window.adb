@@ -210,7 +210,7 @@ procedure Test_Window is
       OK : Boolean := True;
    begin
       for I in 0 .. Rules.Count (P.Kind) - 1 loop
-         OK := OK and then P.Choice.Get_Label (I + 1) = Rules.Label (Rules.Get (P.Kind, I));
+         OK := OK and then P.Choice.Get_Item_Text (I + 1) = Rules.Label (Rules.Get (P.Kind, I));
       end loop;
       return OK;
    end Choice_Labelled;
@@ -296,7 +296,7 @@ procedure Test_Window is
    end Listed;
 
    --  Whether item I of the menu bar is active.
-   function Active (I : Window.Item_Index) return Boolean is (not Window.Bar.Get_Flags (I).Inactive);
+   function Active (I : Window.Item_Index) return Boolean is (Window.Bar.Is_Item_Active (I));
 
    --  Whether the window shows the character shown: its name, and every
    --  number.
@@ -646,7 +646,7 @@ begin
       Choose (P.Choice, N + 3);
       It := P.Item;
       Check.Check (It /= null and then Rules.Name_Of (It) = "Scale Advantage" and then P.Help.Page = 123
-                   and then not P.Spinner.Is_Active and then Widgets.Spin_Value (P.Spinner.all) = 1,
+                   and then not P.Spinner.Is_Active and then P.Spinner.Get_Integer_Value = 1,
                    "a Boss Ability chosen: its page, the level 1 and off");
       P.Text.Set_Value ("Attack");
       P.Add_Button.Do_Callback;
@@ -747,6 +747,10 @@ begin
                 and then Window.Abilities.Browser.Number_Of_Lines = 0 and then Window.Row_Count = 0
                 and then Listed ("1. Acacia|2. Sazza and Fraz|3. Cezar|4. (no name)"),
                 "Character > Add Character: a new one, last, shown");
+   Set_Name ("Imp/Co @b _x");
+   Check.Check (Listed ("1. Acacia|2. Sazza and Fraz|3. Cezar|4. Imp/Co @@b _x")
+                and then Window.Character_Choice.Get_Item_Text (4) = "4. Imp/Co @b _x",
+                "a / in a name no submenu, an @ doubled, so FLTK shows the name as it is");
    Set_Name ("Imp & Co");
    Check.Check (Listed ("1. Acacia|2. Sazza and Fraz|3. Cezar|4. Imp && Co"),
                 "an & in a name doubled, so FLTK shows it");

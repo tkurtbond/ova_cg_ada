@@ -201,9 +201,4 @@ package Ova_Cg.Widgets is
    --  Forgets P and frees its widgets.
    procedure Close_Panel (P : not null Panel_Access);
 
-   --  ---- Helpers ----
-
-   --  A Spinner's value as a whole number, rounded down (ENTIER).
-   function Spin_Value (S : Spinners.Spinner'Class) return Integer;
-
 end Ova_Cg.Widgets;

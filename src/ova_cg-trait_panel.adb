@@ -32,7 +32,6 @@ package body Ova_Cg.Trait_Panel is
    function Sheet (P : Trait_Panel'Class) return Calc.Sheet is (P.Sheet);
    function Owner (P : Trait_Panel'Class) return Calc.Trait is (P.Owner);
    function Top (P : Trait_Panel'Class) return Character.Character_Access is (P.Top);
-   function Name_W (P : Trait_Panel'Class) return Integer is (P.Name_W);
 
    function List (P : Trait_Panel'Class) return Calc.Trait is
      (if P.Owner /= null then P.Owner.Form else P.Sheet.Traits);
@@ -61,18 +60,16 @@ package body Ova_Cg.Trait_Panel is
    function Shows_Points (P : Trait_Panel'Class) return Boolean is
      (P.Sheet /= null and then P.Owner = null and then P.Sheet.Options.Scaled_Cost);
 
-   procedure Fit (P : in out Trait_Panel'Class) is
-      W : constant Integer := P.Browser.Get_W;
+   --  Sets the columns, with the points or without: the name's column
+   --  takes what the others leave, as the browser is resized (-1).
+   procedure Set_Columns (P : in out Trait_Panel'Class) is
    begin
       if Shows_Points (P) then
-         P.Name_W := W - Points_W - Page_W;
-         P.Browser.Set_Column_Widths ([P.Name_W, Points_W]);
+         P.Browser.Set_Column_Widths ([-1, Points_W, Page_W]);
       else
-         P.Name_W := W - 70;  --  as Widgets.Open_Panel
-         P.Browser.Set_Column_Widths ([P.Name_W]);
+         P.Browser.Set_Column_Widths ([-1, 70]);  --  as Widgets.Open_Panel
       end if;
-      P.Browser.Redraw;
-   end Fit;
+   end Set_Columns;
 
    overriding procedure Chosen (P : in out Trait_Panel) is
       It : Rules.Item;
@@ -104,7 +101,7 @@ package body Ova_Cg.Trait_Panel is
       end if;
       P.Offer_Boss (Offers_Boss (P));
       Points := Shows_Points (P);
-      Fit (P);
+      Set_Columns (P);
       T := List (P);
       while T /= null loop
          if T.Of_Kind = P.Kind then
@@ -169,7 +166,7 @@ package body Ova_Cg.Trait_Panel is
          Tell ("Choose a name first.");
          return 0;
       end if;
-      T := Character.New_Trait (It, P.Kind, Widgets.Spin_Value (P.Spinner.all), Null_Unbounded_String,
+      T := Character.New_Trait (It, P.Kind, P.Spinner.Get_Integer_Value, Null_Unbounded_String,
                                 Detail (P));
       L := List (P);
       Character.Insert_Trait (L, T);
@@ -187,7 +184,7 @@ package body Ova_Cg.Trait_Panel is
          It := T.Item;
       end if;
       L := List (P);
-      Character.Change_Trait (L, T, It, Widgets.Spin_Value (P.Spinner.all), Detail (P));
+      Character.Change_Trait (L, T, It, P.Spinner.Get_Integer_Value, Detail (P));
       Set_List (P, L);
       Character.Recompute (P.Top);
       return Line_Of (P, Calc.Trait (T));
@@ -228,7 +225,6 @@ package body Ova_Cg.Trait_Panel is
       P : constant Trait_Panel_Access := new Trait_Panel;
    begin
       Widgets.Open_Panel (Widgets.Panel_Access (P), X, Y, W, H, Kind, Title, "level", "detail");
-      P.Name_W := P.Browser.Get_W - 70;  --  as Open_Panel sets it
       if Kind = Rules.Ability then
          P.Spinner.Set_Range (1.0, 5.0);
          P.Spinner.Set_Value (1.0);

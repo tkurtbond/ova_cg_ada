@@ -63,7 +63,7 @@ package body Ova_Cg.Background is
 
    The_Character : Character.Character_Access;
    File_Dir      : Unbounded_String;  --  the YAML file's directory, absolute; "": never saved
-   Filling       : Boolean := False;  --  the widgets being set from the character: no change to report
+   Filling       : Boolean := False;  --  the inputs being set from the character: no change to report
 
    function Background_Tab return Group_Access is (Open.Background_Tab);
    function Fluff_Tab return Group_Access is (Open.Fluff_Tab);
@@ -122,9 +122,7 @@ package body Ova_Cg.Background is
       pragma Unreferenced (Place, Restyled, Deleted_Text);
       R : Unbounded_String;
    begin
-      if Filling or else The_Character = null or else (Inserted = 0 and Deleted = 0)
-        or else Open.Buffers (Which) = null
-      then
+      if The_Character = null or else (Inserted = 0 and Deleted = 0) or else Open.Buffers (Which) = null then
          return;
       end if;
       R := To_Unbounded_String (Character.Trim (Open.Buffers (Which).Get_Entire_Text));
@@ -170,10 +168,14 @@ package body Ova_Cg.Background is
       Open.Portrait.Clear_Image;
       Free_Image (Open.Image);
       if C.Has_Portrait then
-         Open.Image := new Shared.Shared_Image'
-           (Shared.Forge.Create (Paths.Absolute (To_String (C.Portrait), To_String (File_Dir)), 0, 0));
-         if Open.Image.Is_Valid and then not Open.Image.Is_Empty then
-            Open.Image.Scale (Open.Portrait.Get_W - 6, Open.Portrait.Get_H - 6, True, False);
+         begin
+            Open.Image := new Shared.Shared_Image'
+              (Shared.Forge.Create (Paths.Absolute (To_String (C.Portrait), To_String (File_Dir)), 0, 0));
+         exception
+            when FLTK.Images.No_Image_Error =>
+               null;
+         end;
+         if Open.Image /= null and then Open.Image.Is_Valid and then not Open.Image.Is_Empty then
             Open.Portrait.Set_Label ("");
             Open.Portrait.Set_Image (Open.Image.all);
          else
@@ -190,14 +192,6 @@ package body Ova_Cg.Background is
       end if;
       Open.Portrait.Redraw;
    end Show_Portrait;
-
-   procedure Fit is
-   begin
-      if Open.Image /= null then
-         Open.Image.Scale (Open.Portrait.Get_W - 6, Open.Portrait.Get_H - 6, True, False);
-         Open.Portrait.Redraw;
-      end if;
-   end Fit;
 
    procedure Choose_Portrait_Action (W : in out FLTK.Widgets.Widget'Class) is
       pragma Unreferenced (W);
@@ -231,7 +225,7 @@ package body Ova_Cg.Background is
    begin
       Path := Null_Unbounded_String;
       C.Set_Title ("Choose the character's portrait");
-      C.Set_Filter ("Images" & ASCII.HT & "*.{png,jpg,jpeg,gif,bmp,svg}");  --  FLTK's "name<tab>pattern"
+      C.Add_Filter ("Images", "*.{png,jpg,jpeg,gif,bmp,svg}");
       if C.Show = Picked then
          Path := To_Unbounded_String (C.Get_Filename);
       end if;
@@ -356,7 +350,7 @@ package body Ova_Cg.Background is
       Filling := True;
       Open.Summary_In.Set_Value (To_String (C.Summary));
       for S in Prose_Section loop
-         Open.Buffers (S).Set_Entire_Text (To_String (Prose_Of (S)));
+         Open.Buffers (S).Set_Entire_Text_Quietly (To_String (Prose_Of (S)));  --  no change to report
       end loop;
       for F in Character.Fluff_Field loop
          Open.Fluff_In (F).Set_Value (To_String (C.Fluff (F)));
@@ -456,6 +450,7 @@ package body Ova_Cg.Background is
       Open.Portrait := new Boxes.Box'
         (Boxes.Forge.Create (FLTK.Down_Frame, Left_X, YY + 20, Portrait_W, Portrait_H, ""));
       Open.Portrait.Set_Alignment (FLTK.Align_Inside + FLTK.Align_Wrap);
+      Open.Portrait.Set_Image_Fit (True, Expand => False);
       Open.Portrait_Path := new Widgets.Outputs.Output'
         (Widgets.Outputs.Forge.Create (Left_X + Portrait_W + 10, YY + 40, Column_W - Portrait_W - 10, Row,
                                        "Image file, relative to the character's"));

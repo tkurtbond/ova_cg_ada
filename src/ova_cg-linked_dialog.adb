@@ -420,7 +420,7 @@ package body Ova_Cg.Linked_Dialog is
          return;
       elsif Is_Add then
          Sp := Character.New_Spell (To_Unbounded_String (Name), It.Name, It,
-                                    Widgets.Spin_Value (Open.Spell_Level.all));
+                                    Open.Spell_Level.Get_Integer_Value);
          Calc.Add_Spell (Calc.Trait (The_Trait), Calc.Spell (Sp));
          Line := 1;
          P := The_Trait.Spells;
@@ -436,7 +436,7 @@ package body Ova_Cg.Linked_Dialog is
             X.Item := It;
             X.Ability := It.Name;
          end if;
-         X.Level := Widgets.Spin_Value (Open.Spell_Level.all);
+         X.Level := Open.Spell_Level.Get_Integer_Value;
       end if;
       Something_Changed;
       Show_Spells (Line);
@@ -699,7 +699,7 @@ package body Ova_Cg.Linked_Dialog is
         (Choices.Forge.Create (400, Y, 290, Row,
                                (if The_Cast_Kind = Rules.Weakness then "Weakness" else "Ability")));
       for I in 0 .. Rules.Count (The_Cast_Kind) - 1 loop
-         Open.Spell_Ability.Add (Rules.Label (Rules.Get (The_Cast_Kind, I)), null);
+         Open.Spell_Ability.Add_Text (Rules.Label (Rules.Get (The_Cast_Kind, I)));
       end loop;
       Open.Spell_Ability.Set_Callback (Spell_Ability_Action'Access);
       Open.Spell_Help := Widgets.Open_Help_Button (695, Y, 0);

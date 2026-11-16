@@ -93,10 +93,6 @@ package Ova_Cg.Background is
    procedure Set_Dir (Dir : String)
      with Pre => Background_Tab /= null;
 
-   --  Fits the portrait shown to its box, as the box is now: after the
-   --  window is resized.
-   procedure Fit;
-
    --  Frees the widgets, the tabs last, the buffers and the image:
    --  before the window's Tabs, the tabs' group, is freed.
    procedure Close;

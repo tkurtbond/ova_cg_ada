@@ -141,12 +141,14 @@ procedure Test_Background is
 
    function Note_Count return Natural is (Natural (Window.The_Character.Notes.Length));
 
-   --  Whether the portrait box shows an image, scaled to fit it.
+   --  Whether the portrait box shows an image, which FLTK fits to it as it
+   --  draws, shrinking it but not growing it.
    function Image_Shown return Boolean is
       Img : constant B.Image_Access := B.Portrait_Image;
    begin
-      return Img /= null and then Img.Get_W > 0 and then Img.Get_W <= B.Portrait.Get_W
-        and then Img.Get_H <= B.Portrait.Get_H;
+      return Img /= null and then Img.Get_W > 0 and then B.Portrait.Get_Image /= null
+        and then B.Portrait.Is_Image_Fitted
+        and then not B.Portrait.Is_Image_Expanding;
    end Image_Shown;
 
    function Portrait_Says (S : String) return Boolean is (B.Portrait.Get_Label = S);
