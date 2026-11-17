@@ -324,6 +324,21 @@ with its tests before the next.
   itself (its `project-files` named the gitignored
   `alire/alire_default.gpr`), and a GNUmakefile's `make install`, as
   alibfyaml's, which the quick start uses.
+- Absolute run path [done, 2026-11-17]: gprbuild writes each run-path
+  entry relative to the program (`$ORIGIN/...`) when the two share a
+  directory other than the root (gprbuild-link.adb's
+  `Rpaths_Relative_To`, whenever the toolchain's `Run_Path_Origin` is
+  set; a project can't make it empty: "run path origin cannot be
+  empty"). A checkout near the fltkada install then gave a program
+  whose installed copy couldn't find `libfltkada.so` (reproduced:
+  checkout under `/usr/local/sw/tmp`, copy elsewhere, `ldd`: not
+  found). ova_cg_ada.gpr's Linker now puts `FLTKAda'Project_Dir &
+  FLTKAda'Library_Dir` (absolute; `Library_Dir` alone is as written,
+  relative) first in the run path, and the GNUmakefile adds the GNAT
+  runtime's `adalib` (`gcc -print-file-name=adalib`; a project's
+  `Runtime_Library_Dir` is empty) with `-largs`, last on the command
+  line. The same copy then finds both. gprbuild's own entries stay
+  after ours.
 
 ## The window's widgets
 

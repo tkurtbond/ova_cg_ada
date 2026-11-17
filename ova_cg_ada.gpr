@@ -51,4 +51,18 @@ project Ova_Cg_Ada is
       for Default_Switches ("Ada") use ("-shared", "-Es");
    end Binder;
 
+   --  libfltkada.so's directory, absolute, first in the run path.
+   --  gprbuild's own entry for it is relative to the program
+   --  ($ORIGIN/...) whenever the two share a directory other than the
+   --  root (its Run_Path_Origin, which a project can't make empty), and
+   --  a copy installed elsewhere then follows it to nothing; this entry
+   --  still finds the library.  Project_Dir ends in a separator, and the
+   --  installed fltkada.gpr's Library_Dir is relative to it.  The GNAT
+   --  runtime's directory is added the same way by the GNUmakefile,
+   --  which can ask gcc where it is.
+   package Linker is
+      for Switches ("Ada") use
+        ("-Wl,-rpath," & FLTKAda'Project_Dir & FLTKAda'Library_Dir);
+   end Linker;
+
 end Ova_Cg_Ada;

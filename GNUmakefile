@@ -19,6 +19,16 @@ SHELL = bash
 GPRBUILD ?= gprbuild
 OVA_FMT_DIR ?= ext/ova_fmt
 export GPR_PROJECT_PATH := $(abspath $(OVA_FMT_DIR))$(if $(GPR_PROJECT_PATH),:$(GPR_PROJECT_PATH))
+# The GNAT runtime's directory (libgnat's), absolute in the run path,
+# for the same reason as fltkada's in ova_cg_ada.gpr: gprbuild's entry
+# for it is relative when it shares a directory with the program (a
+# toolchain under $HOME, as Alire's).  gcc prints the name alone when
+# it has no such directory, and then nothing is added.
+# LARGS goes last on gprbuild's command line: what follows -largs is
+# the linker's.
+ADALIB ?= $(shell gcc -print-file-name=adalib)
+comma := ,
+LARGS := $(if $(filter /%,$(ADALIB)),-largs -Wl$(comma)-rpath$(comma)$(ADALIB))
 GPRFLAGS := -p -q -P ova_cg_ada.gpr -Xlibrary_type=dynamic
 
 OBJ := obj
@@ -62,10 +72,10 @@ $(OBJ)/files: | $(OBJ)
 	mkdir -p $@
 
 $(PROGRAM): $(PROGSRC) ova_cg_ada.gpr | $(OBJ)
-	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=program
+	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=program $(LARGS)
 
 $(OBJ)/test_%: test/test_%.adb $(TESTSUPPORT) $(PROGSRC) ova_cg_ada.gpr | $(OBJ)
-	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=tests $(notdir $<)
+	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=tests $(notdir $<) $(LARGS)
 
 # The oracle for files: what the generator saves must format as the
 # file it loaded (test/files.sh, after test_files).  ova_fmt (Ada) by
@@ -101,7 +111,7 @@ check-pages: $(OBJ)/list_rules
 	else echo "FAIL - Ova_Cg.Rules (>) differs from the rulebook's headings (<)"; exit 1; fi
 
 $(OBJ)/list_rules $(OBJ)/open_page: $(OBJ)/%: test/%.adb $(PROGSRC) ova_cg_ada.gpr | $(OBJ)
-	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=tests $(notdir $<)
+	$(GPRBUILD) $(GPRFLAGS) -XOVA_CG_MODE=tests $(notdir $<) $(LARGS)
 
 # Ova_Cg.Viewer with the real viewers, okular, evince and mupdf, on a
 # headless sway of test/viewer.sh's own, on a private D-Bus session bus,
