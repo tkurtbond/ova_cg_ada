@@ -7,9 +7,9 @@ Flaws, and it works out Endurance costs, ROLL, DX, Defense, Health,
 Endurance and Threat Value as you go. It holds no rules text: each name
 shows its rulebook page, and the program can open the rulebook's PDF at
 that page in your PDF viewer. Characters are saved as YAML that the Ada
-[ova_fmt](../ova_fmt) formats.
+[ova_fmt](https://github.com/tkurtbond/ova_fmt) formats.
 
-It is the Ada port of [ova_cg_po](../ova_cg_po) (Oberon-2), built with
+It is the Ada port of [ova_cg_po](https://github.com/tkurtbond/ova_cg_po) (Oberon-2), built with
 GNAT, with fltkada (FLTK 1.4) for the window, alibfyaml (libfyaml) for
 the files, and ova_fmt's own sources for reading characters and writing
 their Markdown. It does what ova_cg_po does, and its tests are
