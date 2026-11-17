@@ -8,13 +8,13 @@ with "libfyaml_ada.gpr";
 --  anything of fltkada's.  The GNUmakefile picks its dynamic library
 --  (-Xlibrary_type=dynamic).
 with "fltkada.gpr";
+--  ova_fmt's packages: its Entities reads a character, its
+--  Format_Markdown and Format_Inline print the Markdown tab's sheet.
+--  Found in OVA_FMT_DIR, the submodule ext/ova_fmt by default, which the
+--  GNUmakefile puts on GPR_PROJECT_PATH.
+with "ova_fmt_lib.gpr";
 
 project Ova_Cg_Ada is
-
-   --  ova_fmt's sources, used as they are: its Entities reads a
-   --  character, its Format_Markdown and Format_Inline print the
-   --  Markdown tab's sheet.
-   Ova_Fmt_Src := external ("OVA_FMT_SRC", external ("HOME") & "/Repos/RPG/Tools/ova_fmt/src");
 
    type Mode_Type is ("program", "tests");
    Mode : Mode_Type := external ("OVA_CG_MODE", "program");
@@ -26,17 +26,13 @@ project Ova_Cg_Ada is
 
    case Mode is
       when "program" =>
-         for Source_Dirs use ("src", Ova_Fmt_Src);
+         for Source_Dirs use ("src");
          for Main use ("ova_cg_main.adb");
       when "tests" =>
-         for Source_Dirs use ("src", "test", Ova_Fmt_Src);
+         for Source_Dirs use ("src", "test");
          for Exec_Dir use "obj";
          --  The GNUmakefile names the test programs (test/test_*.adb).
    end case;
-
-   --  ova_fmt's own command line and main program aren't this one's.
-   for Excluded_Source_Files use
-     ("ova_fmt_main.adb", "ova_fmt-cli.ads", "ova_fmt-cli.adb");
 
    package Builder is
       --  The procedure can't be named Ova_Cg: that is the parent

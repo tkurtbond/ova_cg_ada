@@ -22,7 +22,7 @@ most of the rules below.
 | OVA rulebook (PDF, 170 pages) | `~/Reference/RPG/OVA/OVA_The_Anime_Role-Playing_Game.pdf` |
 | Rulebook as text | `~/Reference/RPG/OVA/ova-rulebook.txt`, `ova-rulebook-not-layout.txt` |
 | Descriptions as Markdown | `~/Reference/RPG/OVA/abilities.md`, `weaknesses.md` -- **never copy into this repo** (below) |
-| The YAML format, and the sources used here | the Ada ova_fmt: `~/Repos/RPG/Tools/ova_fmt/` (`PLAN.md`, `src/`, `test-data/`) |
+| The YAML format, and the packages used here | the Ada ova_fmt: `~/Repos/RPG/Tools/ova_fmt/` (`PLAN.md`, `src/`, `test-data/`), pinned here as the submodule `ext/ova_fmt` |
 | fltkada (FLTK 1.4 binding) | source: `/usr/local/sw/src/tkb/fltkada` (`readme.md`, `AGENTS.md`, `doc/binding_architecture.md`, `PROBLEMS-OUTSTANDING.md`, `examples/`); installed: `/usr/local/sw/versions/ada/include/fltkada.dynamic`, `share/gpr/fltkada.gpr` |
 | alibfyaml (libfyaml binding) | `~/Repos/Ada/alibfyaml`; installed: `/usr/local/sw/versions/ada/include/libfyaml_ada`, `share/gpr/libfyaml_ada.gpr` |
 | arg_parser | installed: `/usr/local/sw/versions/ada/include/arg_parser`, `share/gpr/arg_parser.gpr` |
@@ -47,7 +47,7 @@ index is the printed page + 2.
 ```sh
 make                 # obj/ and ./ova_cg_ada
 make test            # what needs no display: unit tests (TESTS), test/files.sh
-                     #   (needs ova_fmt built: OVA_FMT), test/cli.sh
+                     #   (builds ext/ova_fmt's ova_fmt, or OVA_FMT), test/cli.sh
 make check-pages     # Ova_Cg.Rules' pages against the rulebook's headings (needs mutool)
 make test-viewers    # Ova_Cg.Viewer with real okular, evince, mupdf (test/viewer.sh;
                      #   its own headless sway and private bus)
@@ -74,11 +74,14 @@ make print-VAR       # show a makefile variable
   installed there (`make install PREFIX=/usr/local/sw/versions/ada`,
   both kinds). Its dynamic library is used, built on the shared GNAT
   runtime, so everything here is bound with `-shared`.
-- **ova_fmt's sources are compiled here as they are** (`OVA_FMT_SRC`,
-  default `~/Repos/RPG/Tools/ova_fmt/src`), all but its main program
-  and `Ova_Fmt.Cli`: `Ova_Fmt.Entities` reads a character exactly as
+- **ova_fmt is the submodule `ext/ova_fmt`**, used through its library
+  project `ova_fmt_lib.gpr` (all but its main program and
+  `Ova_Fmt.Cli`): `Ova_Fmt.Entities` reads a character exactly as
   ova_fmt does, and its Markdown and inline formatters make the
-  Markdown tab. Change them in ova_fmt, never by copying.
+  Markdown tab. `OVA_FMT_DIR` names another checkout (the user's own,
+  `~/Repos/RPG/Tools/ova_fmt`, to try a change there). Change ova_fmt
+  in its own repo, never by copying; the submodule moves to a new
+  ova_fmt commit only once that commit is pushed.
 - **Don't modify the library repos** (fltkada, alibfyaml, arg_parser,
   ova_fmt) without the user's go-ahead. A change one needs is made and
   tested in its own repo.

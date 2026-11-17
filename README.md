@@ -11,7 +11,7 @@ that page in your PDF viewer. Characters are saved as YAML that the Ada
 
 It is the Ada port of [ova_cg_po](https://github.com/tkurtbond/ova_cg_po) (Oberon-2), built with
 GNAT, with fltkada (FLTK 1.4) for the window, alibfyaml (libfyaml) for
-the files, and ova_fmt's own sources for reading characters and writing
+the files, and ova_fmt's own packages for reading characters and writing
 their Markdown. It does what ova_cg_po does, and its tests are
 ova_cg_po's, check for check.
 
@@ -205,22 +205,70 @@ evince). If the program can't find the PDF it asks for it once.
 **Rulebook > Choose PDF...** and **Viewer...** choose the PDF and the
 viewer, and they are kept for the next time.
 
+## Quick start
+
+The program needs three Ada libraries installed, plus
+[ova_fmt](https://github.com/tkurtbond/ova_fmt), which comes as a git
+submodule. On Fedora (the package names differ elsewhere; FLTK must be
+1.4):
+
+```sh
+sudo dnf install gcc-gnat gcc-c++ gprbuild fltk-devel libfyaml-devel
+```
+
+Then install [arg_parser](https://github.com/tkurtbond/arg_parser),
+[alibfyaml](https://github.com/tkurtbond/alibfyaml) and
+[fltkada](https://github.com/tkurtbond/fltkada) into one prefix, any
+directory you like, and put its `share/gpr` on `GPR_PROJECT_PATH`
+(fltkada takes a few minutes to build):
+
+```sh
+PREFIX=$HOME/ada
+export GPR_PROJECT_PATH=$PREFIX/share/gpr${GPR_PROJECT_PATH:+:$GPR_PROJECT_PATH}
+
+git clone https://github.com/tkurtbond/arg_parser.git
+(cd arg_parser && make install GPRINSTALL="gprinstall --prefix=$PREFIX")
+
+git clone https://github.com/tkurtbond/alibfyaml.git
+(cd alibfyaml && make install GPRINSTALL="gprinstall --prefix=$PREFIX")
+
+git clone https://github.com/tkurtbond/fltkada.git
+(cd fltkada && make install PREFIX=$PREFIX)
+
+git clone --recursive https://github.com/tkurtbond/ova_cg_ada.git
+cd ova_cg_ada
+make            # ./ova_cg_ada
+make test       # the tests that need no display
+./ova_cg_ada test/data/Acacia.yaml
+```
+
+A clone made without `--recursive` needs `git submodule update --init`
+before `make`. The program finds `libfltkada.so` where fltkada was
+installed, by its run path, so nothing else needs setting to run it.
+Fedora's libfyaml 0.8 is enough for this program, although alibfyaml's
+README asks for a newer one for the rest of its binding.
+
+Everything works without the rulebook except opening it: **?** and
+**Rulebook > Open** ask for its PDF.
+
 ## Building
 
 You need:
 
-- GNAT and gprbuild, FLTK 1.4 and libfyaml.
+- GNAT and gprbuild, a C and C++ compiler, FLTK 1.4 and libfyaml.
 - arg_parser, libfyaml_ada (alibfyaml) and fltkada installed where
   gprbuild finds them (`GPR_PROJECT_PATH`), fltkada with `make install
   PREFIX=...` in its tree; its dynamic library is used. The program finds
   `libfltkada.so` where it is installed, by its run path.
-- ova_fmt's sources, at `OVA_FMT_SRC` (default
-  `~/Repos/RPG/Tools/ova_fmt/src`), compiled here as they are; and for
-  `make test`, ova_fmt built, at `OVA_FMT` (default
-  `~/Repos/RPG/Tools/ova_fmt/ova_fmt`): what the generator saves must
-  format as the file it loaded.
+- ova_fmt, in `OVA_FMT_DIR`: by default the submodule `ext/ova_fmt`,
+  pinned to a commit known to work; set it to use another checkout.
+  The program is built with its library project, `ova_fmt_lib.gpr`
+  (what reads a character, and its Markdown formatters), and `make
+  test` builds its `ova_fmt` (or uses the one `OVA_FMT` names): what
+  the generator saves must format as the file it loaded.
 - For `make check-pages`: mutool.
-- For the window tests: Xvfb (`xvfb-run`) and `xdotool`, or sway.
+- For the window tests: Xvfb (`xvfb-run`, Fedora's
+  `xorg-x11-server-Xvfb`) and `xdotool`, or sway.
 - For `make test-viewers`: sway (with Xwayland), okular, evince, mupdf,
   `gdbus`, `dbus-run-session`, grim, jq and python3.
 - For `make valgrind-headless` and `valgrind-sway`: valgrind.

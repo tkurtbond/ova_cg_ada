@@ -7,7 +7,9 @@
 # $(OBJ); the program goes here, the tests into $(OBJ).
 #
 # The libraries: arg_parser, libfyaml_ada and fltkada installed on
-# GPR_PROJECT_PATH; ova_fmt's sources in OVA_FMT_SRC.  fltkada is
+# GPR_PROJECT_PATH; ova_fmt's library project, ova_fmt_lib.gpr, in
+# OVA_FMT_DIR (the submodule ext/ova_fmt by default), which is put on
+# GPR_PROJECT_PATH here.  fltkada is
 # installed both static and dynamic, and library_type picks: dynamic,
 # on the shared GNAT runtime, named here because the installed
 # project's default is whichever kind was installed first.
@@ -15,15 +17,17 @@
 SHELL = bash
 
 GPRBUILD ?= gprbuild
-OVA_FMT_SRC ?= $(HOME)/Repos/RPG/Tools/ova_fmt/src
-GPRFLAGS := -p -q -P ova_cg_ada.gpr -Xlibrary_type=dynamic -XOVA_FMT_SRC=$(OVA_FMT_SRC)
+OVA_FMT_DIR ?= ext/ova_fmt
+export GPR_PROJECT_PATH := $(abspath $(OVA_FMT_DIR))$(if $(GPR_PROJECT_PATH),:$(GPR_PROJECT_PATH))
+GPRFLAGS := -p -q -P ova_cg_ada.gpr -Xlibrary_type=dynamic
 
 OBJ := obj
 
 PROGRAM := ova_cg_ada
 
 # Every source a program is built from, for make's dependencies.
-PROGSRC := $(wildcard src/*.ad[sb] src/*.c $(OVA_FMT_SRC)/*.ad[sb])
+PROGSRC := $(wildcard src/*.ad[sb] src/*.c $(OVA_FMT_DIR)/src/*.ad[sb]) \
+  $(OVA_FMT_DIR)/ova_fmt_lib.gpr
 
 # Test support, and test programs (test/<name>.adb): TESTS need no
 # display, GUITESTS do.
@@ -48,6 +52,11 @@ tests: $(PROGRAM) $(TESTBINS) $(GUITESTBINS)
 $(OBJ):
 	mkdir -p $@
 
+# Not there: the submodule wasn't checked out.
+$(OVA_FMT_DIR)/ova_fmt_lib.gpr:
+	@echo "$@ isn't there: run git submodule update --init," \
+	  "or set OVA_FMT_DIR to an ova_fmt checkout" >&2; exit 1
+
 # test_files saves its copies here, for test/files.sh.
 $(OBJ)/files: | $(OBJ)
 	mkdir -p $@
@@ -60,12 +69,17 @@ $(OBJ)/test_%: test/test_%.adb $(TESTSUPPORT) $(PROGSRC) ova_cg_ada.gpr | $(OBJ)
 
 # The oracle for files: what the generator saves must format as the
 # file it loaded (test/files.sh, after test_files).  ova_fmt (Ada) by
-# default; ova_fmt_po, its Oberon port, gives the same output.
-OVA_FMT ?= $(HOME)/Repos/RPG/Tools/ova_fmt/ova_fmt
+# default, the one in OVA_FMT_DIR, built here; ova_fmt_po, its Oberon
+# port, gives the same output.
+OVA_FMT ?= $(OVA_FMT_DIR)/ova_fmt
+
+$(OVA_FMT_DIR)/ova_fmt: $(wildcard $(OVA_FMT_DIR)/src/*.ad[sb]) $(OVA_FMT_DIR)/ova_fmt.gpr \
+  $(OVA_FMT_DIR)/ova_fmt_lib.gpr
+	$(GPRBUILD) -p -q -P $(OVA_FMT_DIR)/ova_fmt.gpr
 
 # What needs no display: the unit tests, test/files.sh, then
 # test/cli.sh; fail at the end if any failed.
-test: $(PROGRAM) $(TESTBINS) | $(OBJ)/files
+test: $(PROGRAM) $(TESTBINS) $(filter $(OVA_FMT_DIR)/ova_fmt,$(OVA_FMT)) | $(OBJ)/files
 	@status=0; for t in $(TESTS); do \
 	  echo "== $$t"; (cd test && timeout $(TIMEOUT) ../$(OBJ)/$$t) || status=1; \
 	done; \

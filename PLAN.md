@@ -18,7 +18,7 @@ package ports a module, and each test its checks, with the same labels.
 | Ropes | `Ada.Strings.Unbounded` |
 | polibfyaml | alibfyaml (`libfyaml_ada.gpr`), with its `Libfyaml.Documents.Styled` (below) |
 | pofltk | fltkada (`fltkada.gpr`, installed) |
-| `OvaEntities`, `OvaText`, `OvaOut`, `OvaConfig`, `OvaCommon`, `OvaInline` (ova_fmt_po's, copied) | the Ada ova_fmt's sources, compiled from its tree (`OVA_FMT_SRC`), not copied |
+| `OvaEntities`, `OvaText`, `OvaOut`, `OvaConfig`, `OvaCommon`, `OvaInline` (ova_fmt_po's, copied) | the Ada ova_fmt's packages, through its `ova_fmt_lib.gpr` (submodule `ext/ova_fmt`), not copied |
 | `FlPreferences` | `FLTK.Environment` (`Fl_Preferences`) |
 | `OvaSpawn.c` | `Ova_Cg.Spawn`, with what it needs of POSIX imported from C directly, or a small C file if that proves simpler |
 
@@ -64,9 +64,17 @@ with the program's name changed.
   (`library_type`'s default), on the shared GNAT runtime, so the
   program is bound with `-shared`; the run path gprbuild records finds
   `libfltkada.so` in the install (checked with `readelf -d`).
-- **ova_fmt's sources are compiled here** but for `ova_fmt_main.adb`
-  and `Ova_Fmt.Cli` (which parses ova_fmt's own command line at
-  elaboration).
+- **ova_fmt is a submodule, `ext/ova_fmt`, used through its library
+  project `ova_fmt_lib.gpr`** (since 2026-11-17): all of its packages
+  but `ova_fmt_main.adb` and `Ova_Fmt.Cli` (which parses ova_fmt's own
+  command line at elaboration). `OVA_FMT_DIR` names another checkout.
+  Before, ova_fmt's `src/` was compiled here from `OVA_FMT_SRC` (the
+  user's own tree) with those three excluded, so anyone else building
+  needed that tree where the user keeps it. The submodule pins a commit
+  known to work, so a `git clone --recursive` builds; the library
+  project keeps which files are the library in ova_fmt. ova_fmt's code
+  is now compiled with its own switches (Ada 2012, no `-gnata`), not
+  ours.
 - **The prefs file is `$XDG_CONFIG_HOME/ova_cg_ada/ova_cg_ada.prefs`**
   (vendor and application `ova_cg_ada`), so the two programs' don't
   mix.
@@ -300,6 +308,22 @@ with its tests before the next.
   dynamic first, and the GNUmakefile names `dynamic` anyway). The
   program's run path names the install, not the tree (`readelf -d`).
   `make test`, `test-headless` pass; fltkada's `check-headless` passes.
+- ova_fmt as a submodule [done, 2026-11-17]: ova_fmt gained
+  `ova_fmt_lib.gpr` (its packages but the command line, a static
+  library), which its own `ova_fmt.gpr` withs; its output is unchanged
+  (all of `test-data/` in every format, compared with the old binary).
+  Here `with "ova_fmt_lib.gpr"`, found through `OVA_FMT_DIR`
+  (`ext/ova_fmt`), which the GNUmakefile puts on `GPR_PROJECT_PATH`;
+  `OVA_FMT_SRC` and the exclusion list gone; `OVA_FMT` defaults to the
+  submodule's `ova_fmt`, built by `make test`. README.md has a quick
+  start, tried from GitHub on a scratch prefix. It found that
+  arg_parser didn't build from a clone: its `arg_parser.gpr` named a
+  `config/` source directory that nothing fills (gitignored; Alire's
+  configuration goes to `alire/config`). Fixed in arg_parser with the
+  user's go-ahead: `config/` dropped, `alire.toml` uses `arg_parser.gpr`
+  itself (its `project-files` named the gitignored
+  `alire/alire_default.gpr`), and a GNUmakefile's `make install`, as
+  alibfyaml's, which the quick start uses.
 
 ## The window's widgets
 
