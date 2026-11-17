@@ -6,17 +6,17 @@
 # test programs (test/test_*.adb) in tests mode.  Both write into
 # $(OBJ); the program goes here, the tests into $(OBJ).
 #
-# The libraries: arg_parser and libfyaml_ada installed on
-# GPR_PROJECT_PATH; fltkada built in its own tree, FLTKADA (make
-# build-dynamic there), used through proj/fltkada_ext.gpr and never
-# rebuilt from here; ova_fmt's sources in OVA_FMT_SRC.
+# The libraries: arg_parser, libfyaml_ada and fltkada installed on
+# GPR_PROJECT_PATH; ova_fmt's sources in OVA_FMT_SRC.  fltkada is
+# installed both static and dynamic, and library_type picks: dynamic,
+# on the shared GNAT runtime, named here because the installed
+# project's default is whichever kind was installed first.
 
 SHELL = bash
 
 GPRBUILD ?= gprbuild
-FLTKADA ?= /usr/local/sw/src/tkb/fltkada
 OVA_FMT_SRC ?= $(HOME)/Repos/RPG/Tools/ova_fmt/src
-GPRFLAGS := -p -q -P ova_cg_ada.gpr -XFLTKADA=$(FLTKADA) -XOVA_FMT_SRC=$(OVA_FMT_SRC)
+GPRFLAGS := -p -q -P ova_cg_ada.gpr -Xlibrary_type=dynamic -XOVA_FMT_SRC=$(OVA_FMT_SRC)
 
 OBJ := obj
 
@@ -156,8 +156,8 @@ valgrind-sway: tests
 # ---- Installation ----
 #
 # To $(PREFIX)/bin, $HOME/local/bin by default, as ova_fmt's.  DESTDIR
-# is prepended, for staging.  The program finds libfltkada.so in
-# FLTKADA/lib by its run path, so that tree must stay where it is.
+# is prepended, for staging.  The program finds libfltkada.so where
+# fltkada is installed, by its run path.
 PREFIX ?= $(HOME)/local
 BINDIR ?= $(PREFIX)/bin
 

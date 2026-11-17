@@ -17,7 +17,7 @@ package ports a module, and each test its checks, with the same labels.
 | ArgParser | arg_parser (`arg_parser.gpr`) |
 | Ropes | `Ada.Strings.Unbounded` |
 | polibfyaml | alibfyaml (`libfyaml_ada.gpr`), with its `Libfyaml.Documents.Styled` (below) |
-| pofltk | fltkada (`proj/fltkada_ext.gpr` over its built tree) |
+| pofltk | fltkada (`fltkada.gpr`, installed) |
 | `OvaEntities`, `OvaText`, `OvaOut`, `OvaConfig`, `OvaCommon`, `OvaInline` (ova_fmt_po's, copied) | the Ada ova_fmt's sources, compiled from its tree (`OVA_FMT_SRC`), not copied |
 | `FlPreferences` | `FLTK.Environment` (`Fl_Preferences`) |
 | `OvaSpawn.c` | `Ova_Cg.Spawn`, with what it needs of POSIX imported from C directly, or a small C file if that proves simpler |
@@ -55,12 +55,15 @@ with the program's name changed.
 - **The main procedure is `Ova_Cg_Main`**, named `ova_cg_ada` by the
   project, since `Ova_Cg` is the packages' parent (as `Ova_Fmt` is
   ova_fmt's).
-- **fltkada is `Externally_Built`** (`proj/fltkada_ext.gpr`): its own
-  `fltkada.gpr` isn't, so `with`ing it would let gprbuild recompile and
-  relink inside the fltkada tree. Its library is dynamic, on the shared
-  GNAT runtime, so the program is bound with `-shared`; the run path
-  gprbuild records finds `libfltkada.so` in the tree (checked with
-  `readelf -d`).
+- **fltkada is used as installed** (`with "fltkada.gpr"`, the project
+  gprinstall writes, which is `Externally_Built`), as arg_parser and
+  libfyaml_ada are. Until 2026-11-17 it was used where it was built,
+  through a project of our own (`proj/fltkada_ext.gpr`) marking that
+  tree `Externally_Built`, since the tree's `fltkada.gpr` isn't; the
+  install then was weeks behind the tree. Its library is dynamic
+  (`library_type`'s default), on the shared GNAT runtime, so the
+  program is bound with `-shared`; the run path gprbuild records finds
+  `libfltkada.so` in the install (checked with `readelf -d`).
 - **ova_fmt's sources are compiled here** but for `ova_fmt_main.adb`
   and `Ova_Fmt.Cli` (which parses ova_fmt's own command line at
   elaboration).
@@ -151,8 +154,11 @@ with the program's name changed.
   re-raises.
 - fltk.ads's `pragma Linker_Options` (`-lfltk`, ...) reach only a
   program that `with`s FLTK, but every program here links
-  `libfltkada.so` (the project imports it), so `proj/fltkada_ext.gpr`
-  gives them as the project's `Linker_Options` too.
+  `libfltkada.so` (the project imports it). **Fixed in fltkada** (with
+  the user's go-ahead, 2026-11-17): its `fltkada.gpr` gives them as
+  `Linker_Options`, which gprinstall copies into the installed
+  project, and, for the dynamic kind, as `Library_Options`, so
+  `libfltkada.so` records them (`NEEDED`).
 - `Ova_Cg.Calc`'s lists are freed by hand (`Free`), where ova_cg_po's
   are collected, so a test that re-initializes a record still linked
   into a sheet (TestCalc's `InitAttack (a)` before the `Parse` checks)
@@ -280,6 +286,20 @@ with its tests before the next.
   raises for a file it can't read (fltkada bug 141's fix). `make
   test`, `test-headless`, `test-sway`, `valgrind-headless` and
   `valgrind-sway` pass.
+- fltkada used as installed [done, 2026-11-17]: `with "fltkada.gpr"`
+  from `GPR_PROJECT_PATH`, `proj/fltkada_ext.gpr` and `FLTKADA` gone.
+  fltkada's `fltkada.gpr` now gives the FLTK libraries as
+  `Linker_Options` (and, dynamic, `Library_Options`); reinstalled at
+  `/usr/local/sw/versions/ada`, static and dynamic, by its `make
+  install PREFIX=...`. Found doing it (fltkada's FLTKAda-BUGS.md,
+  section 142, fixed there with the user's go-ahead): its two kinds
+  shared `obj/` and `lib/` (now `obj/KIND`, `lib/KIND`); gprinstall
+  won't install over an install made from a since-changed `fltkada.gpr`
+  (`install` now uninstalls first); and the installed project's
+  `library_type` defaults to the kind installed first (`install` does
+  dynamic first, and the GNUmakefile names `dynamic` anyway). The
+  program's run path names the install, not the tree (`readelf -d`).
+  `make test`, `test-headless` pass; fltkada's `check-headless` passes.
 
 ## The window's widgets
 

@@ -210,12 +210,10 @@ viewer, and they are kept for the next time.
 You need:
 
 - GNAT and gprbuild, FLTK 1.4 and libfyaml.
-- arg_parser and libfyaml_ada (alibfyaml) installed where gprbuild
-  finds them (`GPR_PROJECT_PATH`).
-- fltkada, built in its own tree (`make build-dynamic` there), at
-  `FLTKADA` (default `/usr/local/sw/src/tkb/fltkada`). The program
-  finds `libfltkada.so` there by its run path, so that tree must stay
-  where it is.
+- arg_parser, libfyaml_ada (alibfyaml) and fltkada installed where
+  gprbuild finds them (`GPR_PROJECT_PATH`), fltkada with `make install
+  PREFIX=...` in its tree; its dynamic library is used. The program finds
+  `libfltkada.so` where it is installed, by its run path.
 - ova_fmt's sources, at `OVA_FMT_SRC` (default
   `~/Repos/RPG/Tools/ova_fmt/src`), compiled here as they are; and for
   `make test`, ova_fmt built, at `OVA_FMT` (default

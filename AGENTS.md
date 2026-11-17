@@ -23,7 +23,7 @@ most of the rules below.
 | Rulebook as text | `~/Reference/RPG/OVA/ova-rulebook.txt`, `ova-rulebook-not-layout.txt` |
 | Descriptions as Markdown | `~/Reference/RPG/OVA/abilities.md`, `weaknesses.md` -- **never copy into this repo** (below) |
 | The YAML format, and the sources used here | the Ada ova_fmt: `~/Repos/RPG/Tools/ova_fmt/` (`PLAN.md`, `src/`, `test-data/`) |
-| fltkada (FLTK 1.4 binding) | `/usr/local/sw/src/tkb/fltkada` (`readme.md`, `AGENTS.md`, `doc/binding_architecture.md`, `PROBLEMS-OUTSTANDING.md`, `examples/`) |
+| fltkada (FLTK 1.4 binding) | source: `/usr/local/sw/src/tkb/fltkada` (`readme.md`, `AGENTS.md`, `doc/binding_architecture.md`, `PROBLEMS-OUTSTANDING.md`, `examples/`); installed: `/usr/local/sw/versions/ada/include/fltkada.dynamic`, `share/gpr/fltkada.gpr` |
 | alibfyaml (libfyaml binding) | `~/Repos/Ada/alibfyaml`; installed: `/usr/local/sw/versions/ada/include/libfyaml_ada`, `share/gpr/libfyaml_ada.gpr` |
 | arg_parser | installed: `/usr/local/sw/versions/ada/include/arg_parser`, `share/gpr/arg_parser.gpr` |
 
@@ -68,11 +68,11 @@ make print-VAR       # show a makefile variable
   test_calc.adb`); the GNUmakefile does both. A new unit test needs
   only its file, `test/test_NAME.adb`, with NAME in the GNUmakefile's
   list for TESTS or GUITESTS.
-- **fltkada is used where it is built** (`FLTKADA`, default
-  `/usr/local/sw/src/tkb/fltkada`), through `proj/fltkada_ext.gpr`,
-  which marks it `Externally_Built`: building here never compiles or
-  relinks anything in that tree. Rebuild it there (`make
-  build-dynamic`). It is a shared library built on the shared GNAT
+- **fltkada is used as installed** (`fltkada.gpr` on
+  `GPR_PROJECT_PATH`, `Externally_Built`), like arg_parser and
+  libfyaml_ada: a change in its tree reaches this repo only once it is
+  installed there (`make install PREFIX=/usr/local/sw/versions/ada`,
+  both kinds). Its dynamic library is used, built on the shared GNAT
   runtime, so everything here is bound with `-shared`.
 - **ova_fmt's sources are compiled here as they are** (`OVA_FMT_SRC`,
   default `~/Repos/RPG/Tools/ova_fmt/src`), all but its main program

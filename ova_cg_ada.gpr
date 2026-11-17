@@ -4,8 +4,10 @@
 
 with "arg_parser.gpr";
 with "libfyaml_ada.gpr";
---  fltkada isn't installed: proj/fltkada_ext.gpr uses it where it is.
-with "proj/fltkada_ext.gpr";
+--  Installed, so Externally_Built: building here never compiles
+--  anything of fltkada's.  The GNUmakefile picks its dynamic library
+--  (-Xlibrary_type=dynamic).
+with "fltkada.gpr";
 
 project Ova_Cg_Ada is
 
